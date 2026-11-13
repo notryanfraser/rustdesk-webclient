@@ -11,13 +11,22 @@
 // (Chromium's VP9 output is coded 2784 wide for a 2700-wide display). A resolution change on
 // the remote arrives as a keyframe at the new size: the canvas follows the frames.
 // * Output pixel formats differ by browser (I420, BGRX), so frames are drawn with drawImage.
+// * Hardware decoding is asked for ("prefer-hardware") where the probe (probe.ts) found the
+// browser offers it. If such a decoder then fails, that codec is configured without the hint
+// from then on, so a broken hardware decoder costs one keyframe, not the session.
 //
 // Rendering: only the newest decoded frame is drawn, on the next animation frame; a frame
 // superseded before then is closed undrawn (droppedStale). submit() resolves when the decoder
 // has output its chunks (not when drawn), or after ackTimeoutMs at the latest, so the peer is
 // never held up by a decoder that swallowed a chunk.
 
-import type { VideoChunk, VideoCodec, VideoSink, VideoStats } from "./types.js";
+import type {
+  DecoderChoices,
+  VideoChunk,
+  VideoCodec,
+  VideoSink,
+  VideoStats,
+} from "./types.js";
 import { CODEC_STRINGS, EMPTY_STATS } from "./types.js";
 
 export interface VideoPipelineOptions {
@@ -29,6 +38,8 @@ export interface VideoPipelineOptions {
   statsIntervalMs?: number;
   /** Default 250. */
   ackTimeoutMs?: number;
+  /** From probeDecoders(). Without it: the default codec strings, no hardware hint. */
+  decoders?: DecoderChoices;
 }
 
 interface PendingMessage {
@@ -47,6 +58,10 @@ export class VideoPipeline implements VideoSink {
   private decoder: VideoDecoder | undefined;
   private codec: VideoCodec | undefined;
   private needKey = true;
+  /** The current decoder was configured with "prefer-hardware". */
+  private hardware = false;
+  /** Codecs whose hardware decoder failed. */
+  private readonly noHardware = new Set<VideoCodec>();
   /** One entry per chunk handed to the decoder, in decode order. */
   private fifo: { msg: PendingMessage; t0: number }[] = [];
   private latest: VideoFrame | undefined;
@@ -170,14 +185,23 @@ export class VideoPipeline implements VideoSink {
         if (this.decoder === decoder) this.fail(e);
       },
     });
+    const choice = this.opts.decoders?.[codec];
+    const hardware = !!choice?.hardware && !this.noHardware.has(codec);
     decoder.configure({
-      codec: CODEC_STRINGS[codec],
+      codec: choice?.codec ?? CODEC_STRINGS[codec],
       optimizeForLatency: true,
+      ...(hardware ? { hardwareAcceleration: "prefer-hardware" } : {}),
     });
     this.decoder = decoder;
     this.codec = codec;
+    this.hardware = hardware;
     this.needKey = true;
     this.totals.codec = codec;
+    this.totals.decoder = hardware
+      ? "hardware"
+      : choice && !choice.hardware
+        ? "software"
+        : "";
   }
 
   /** Close the current decoder; messages waiting on it are released (acked). */
@@ -192,6 +216,7 @@ export class VideoPipeline implements VideoSink {
 
   private fail(e: unknown): void {
     this.totals.decodeErrors++;
+    if (this.hardware && this.codec) this.noHardware.add(this.codec);
     const pending = this.fifo.splice(0);
     this.resetDecoder();
     const err = e instanceof Error ? e : new Error(String(e));

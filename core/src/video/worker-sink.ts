@@ -3,6 +3,7 @@
 // the bundler decides how the worker file is loaded), e.g. with Vite or esbuild:
 // new Worker(new URL("./video-worker.js", import.meta.url), { type: "module" })
 import type {
+  DecoderChoices,
   VideoChunk,
   VideoSink,
   VideoStats,
@@ -17,6 +18,8 @@ export interface WorkerVideoSinkOptions {
   /** The worker could not start (e.g. no 2d context on OffscreenCanvas). */
   onFatal?: (error: string) => void;
   statsIntervalMs?: number;
+  /** From probeDecoders(): codec strings and hardware hints for the worker's decoders. */
+  decoders?: DecoderChoices;
   /** Settle submit() if the worker does not answer in time. Default 1000. */
   replyTimeoutMs?: number;
 }
@@ -52,6 +55,7 @@ export class WorkerVideoSink implements VideoSink {
         type: "init",
         canvas: offscreen,
         statsIntervalMs: opts.statsIntervalMs,
+        decoders: opts.decoders,
       },
       [offscreen],
     );

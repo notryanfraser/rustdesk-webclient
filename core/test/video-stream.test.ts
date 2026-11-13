@@ -12,9 +12,11 @@ import {
   VideoFrameSchema,
   VideoStream,
   create,
+  decodingMessage,
   fromBinary,
   videoLoginOption,
   type Message,
+  type OptionMessage,
   type VideoChunk,
   type VideoSink,
 } from "../src/index.js";
@@ -73,6 +75,36 @@ describe("videoLoginOption", () => {
     expect(d.abilityH265).toBe(0);
     expect(d.prefer).toBe(SupportedDecoding_PreferCodec.VP9);
     expect(d.i444).toBeUndefined();
+  });
+
+  it("declares and prefers H.264 / H.265 only when the browser decodes them", () => {
+    const both = videoLoginOption({
+      h264: true,
+      h265: true,
+    }).supportedDecoding!;
+    expect([both.abilityH264, both.abilityH265]).toEqual([1, 1]);
+    expect(both.prefer).toBe(SupportedDecoding_PreferCodec.H264);
+    const hevc = videoLoginOption({ h265: true }).supportedDecoding!;
+    expect([hevc.abilityH264, hevc.abilityH265]).toEqual([0, 1]);
+    expect(hevc.prefer).toBe(SupportedDecoding_PreferCodec.H265);
+    // A preference for a codec we do not declare is ignored.
+    expect(videoLoginOption({ prefer: "h264" }).supportedDecoding!.prefer).toBe(
+      SupportedDecoding_PreferCodec.VP9,
+    );
+    expect(
+      videoLoginOption({ h264: true, prefer: "vp8" }).supportedDecoding!.prefer,
+    ).toBe(SupportedDecoding_PreferCodec.VP8);
+  });
+
+  it("decodingMessage carries only supported_decoding", () => {
+    const m = decodingMessage({ h265: true });
+    const o = (
+      m.union.value as { union: { case: string; value: OptionMessage } }
+    ).union;
+    expect(o.case).toBe("option");
+    expect(o.value.supportedDecoding!.abilityH264).toBe(0);
+    expect(o.value.supportedDecoding!.abilityH265).toBe(1);
+    expect(o.value.customFps).toBe(0);
   });
 });
 

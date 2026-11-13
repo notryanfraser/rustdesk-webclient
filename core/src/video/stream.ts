@@ -93,7 +93,7 @@ export interface VideoStreamStats {
   ackTimed: number;
   /** Messages dropped: another display than the one shown. */
   droppedOtherDisplay: number;
-  /** Messages dropped: a codec we do not decode (rgb, yuv, h264, h265). */
+  /** Messages dropped: a format we do not decode (rgb, yuv). */
   droppedUnsupported: number;
   /** Sink rejections (decoder trouble). */
   sinkErrors: number;
@@ -109,6 +109,8 @@ const CASE_TO_CODEC: Partial<Record<string, VideoCodec>> = {
   vp9s: "vp9",
   vp8s: "vp8",
   av1s: "av1",
+  h264s: "h264",
+  h265s: "h265",
 };
 
 export class VideoStream {

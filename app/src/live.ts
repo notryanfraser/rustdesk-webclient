@@ -22,12 +22,15 @@ import {
   connectSession,
   describeSessionClosed,
   videoLoginOption,
+  decodingMessage,
+  probeDecoders,
   qualityMessage,
   chatMessage,
   readChatMessage,
   type QualityOptions,
   type KeyboardInputMode,
   type AudioPlayerStats,
+  type DecoderChoices,
   type DisplayInfo,
   type ErrorDescription,
   type RemoteGeometry,
@@ -143,6 +146,8 @@ export class LiveSession {
     keyboardMode: KeyboardInputMode = "map",
     primarySink?: VideoSink,
     private readonly early: EarlyState = { recordingAllowed: true },
+    /** What the browser decodes (probeDecoders()), for the other displays' workers. */
+    private readonly decoders: DecoderChoices = {},
   ) {
     this.keyboardMode = keyboardMode;
     this.primarySink = primarySink;
@@ -207,9 +212,33 @@ export class LiveSession {
   static async connect(a: ConnectArgs): Promise<LiveSession> {
     let live: LiveSession | undefined;
     const update = (patch: Partial<LiveSnapshot>) => live?.patch(patch);
+    // H.264 / H.265 (the codecs a peer encodes on its GPU) are declared only where this
+    // browser decodes them.
+    const decoders = await probeDecoders();
+    const able = { h264: !!decoders.h264, h265: !!decoders.h265 };
+    // A browser can accept an H.264 / H.265 configuration and still fail on the peer's stream.
+    // Three stats reports in a row with new decode errors and nothing drawn: stop declaring
+    // that codec, and the peer goes back to VP9.
+    let strikes = 0;
+    let seen = { decodeErrors: 0, rendered: 0 };
+    const watchDecoder = (s: VideoStats) => {
+      const failing =
+        s.decodeErrors > seen.decodeErrors && s.rendered === seen.rendered;
+      if (s.rendered > seen.rendered) strikes = 0;
+      seen = { decodeErrors: s.decodeErrors, rendered: s.rendered };
+      if (!failing || (s.codec !== "h264" && s.codec !== "h265")) return;
+      if (!able[s.codec] || ++strikes < 3) return;
+      strikes = 0;
+      able[s.codec] = false;
+      live?.send(decodingMessage(able));
+    };
     const worker = new Worker("video-worker.js", { type: "module" });
     const primarySink = new WorkerVideoSink(worker, a.canvas, {
-      onStats: (s) => update({ video: s }),
+      decoders,
+      onStats: (s) => {
+        watchDecoder(s);
+        update({ video: s });
+      },
       onResize: (width, height) => live?.setSize(width, height),
     });
     // The primary display's frames also feed a recording, when there is one.
@@ -266,7 +295,7 @@ export class LiveSession {
         peerId: a.peerId,
         password: a.password,
         pageIsHttps: a.config.wss,
-        option: videoLoginOption(a.quality),
+        option: videoLoginOption({ ...a.quality, ...able }),
         autoAckVideo: false,
         onEvent,
         onWaitingForApproval: a.onWaitingForApproval,
@@ -282,6 +311,7 @@ export class LiveSession {
         a.keyboardMode,
         tee,
         early,
+        decoders,
       );
       return live;
     } catch (e) {
@@ -319,8 +349,12 @@ export class LiveSession {
 
   /** Change image quality / frame rate now (Misc.option). */
   setQuality(o: QualityOptions): void {
+    this.send(qualityMessage(o));
+  }
+
+  private send(m: Parameters<Session["send"]>[0]): void {
     try {
-      this.session.send(qualityMessage(o));
+      this.session.send(m);
     } catch {
       // session already closed
     }
@@ -360,6 +394,7 @@ export class LiveSession {
           new Worker("video-worker.js", { type: "module" }),
           canvas,
           {
+            decoders: this.decoders,
             onStats: (s) =>
               this.patch({
                 videoOthers: { ...this.snap.videoOthers, [index]: s },
@@ -401,7 +436,7 @@ export class LiveSession {
     const codec = v?.codec;
     if (codec !== "vp9" && codec !== "vp8")
       throw new Error(
-        `Recording needs VP9 or VP8 video; this remote sends ${codec ? codec.toUpperCase() : "no video yet"}.`,
+        `Recording (WebM) needs VP9 or VP8 video; this remote sends ${codec ? codec.toUpperCase() : "no video yet"}.`,
       );
     this.recorder = new SessionRecorder(
       target,

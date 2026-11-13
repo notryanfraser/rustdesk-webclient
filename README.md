@@ -9,7 +9,9 @@ control any of your RustDesk machines from a browser, with nothing to install.
 
 **What works**
 
-- Screen (VP9, VP8, AV1 through the browser's WebCodecs), with quality, frame rate and
+- Screen (H.264 and H.265 where the browser decodes them and the remote has a hardware
+  encoder, otherwise VP9 or VP8, through the browser's WebCodecs, hardware-decoded where the
+  browser offers it), with quality, frame rate and
   scaling settings, and every monitor of the remote at once
 - Keyboard (by position or by character), mouse, touch with an on-screen key bar, and
   Ctrl+Alt+Del
@@ -158,7 +160,7 @@ report a vulnerability.
 | "That ID isn't registered with your server" | The remote isn't registered with this server: check its ID server and Key settings. |
 | It finds the remote, then can't connect | `wss://<hbbs's relay host>:21119` must reach hbbr (test below); check hbbs's `-r`. |
 | hbbs's log says `relay-servers=[]` | hbbs drops a `-r` name it can't resolve when it starts: check DNS from the hbbs container, then restart hbbs. |
-| Connected, but the screen stays black | The browser can't decode the remote's codec (VP9, VP8 or AV1). Update the browser, or try another. |
+| Connected, but the screen stays black | The browser can't decode the remote's codec (H.264, H.265, VP9 or VP8). Update the browser, or try another. |
 
 **Test a WebSocket through the proxy.** Expect `HTTP/1.1 101 Switching Protocols`; curl then
 waits, so stop it with Ctrl+C:

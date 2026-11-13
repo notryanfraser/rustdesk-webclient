@@ -7,14 +7,31 @@
 // * one VideoFrame can carry several EncodedVideoFrames, decoded in order.
 
 /** Codecs the client decodes. Anything else the peer sends is dropped (and acked). */
-export type VideoCodec = "vp9" | "vp8" | "av1";
+export type VideoCodec = "vp9" | "vp8" | "av1" | "h264" | "h265";
 
-/** WebCodecs codec strings, 8-bit 4:2:0 (what the peer encodes unless asked for 4:4:4). */
+/**
+ * WebCodecs codec strings, 8-bit 4:2:0 (what the peer encodes unless asked for 4:4:4). The
+ * defaults; probeDecoders() (probe.ts) picks the string this browser accepts. H.264 and H.265
+ * arrive as Annex B (parameter sets in band), so they are configured without a description.
+ */
 export const CODEC_STRINGS: Record<VideoCodec, string> = {
   vp9: "vp09.00.41.08",
   vp8: "vp8",
   av1: "av01.0.08M.08",
+  h264: "avc1.640033",
+  h265: "hvc1.1.6.L153.B0",
 };
+
+/** How to configure the decoder of one codec, as found by probeDecoders(). */
+export interface DecoderChoice {
+  /** The WebCodecs codec string the browser accepted. */
+  codec: string;
+  /** The browser accepts this codec with hardwareAcceleration: "prefer-hardware". */
+  hardware: boolean;
+}
+
+/** The codecs this browser decodes; a codec without an entry is not decodable. */
+export type DecoderChoices = Partial<Record<VideoCodec, DecoderChoice>>;
 
 /** One encoded frame, ready for a decoder. `data` is owned by the chunk (safe to transfer). */
 export interface VideoChunk {
@@ -57,6 +74,13 @@ export interface VideoStats {
   width: number;
   height: number;
   codec: VideoCodec | "";
+  /**
+   * How the current decoder was configured: "hardware" when the browser accepted
+   * "prefer-hardware" for it, "software" when it refused, "" when unknown (no probe, or
+   * the hardware decoder failed and the browser now chooses). WebCodecs does not report what
+   * actually runs: a browser that ignores the hint shows as "hardware".
+   */
+  decoder: "hardware" | "software" | "";
   /** Mean time from submit to decoder output over the interval, ms. */
   decodeMs: number;
   /**
@@ -77,13 +101,19 @@ export const EMPTY_STATS: VideoStats = {
   width: 0,
   height: 0,
   codec: "",
+  decoder: "",
   decodeMs: 0,
   meanLuma: -1,
 };
 
 /** Main thread -> video worker. */
 export type WorkerRequest =
-  | { type: "init"; canvas: OffscreenCanvas; statsIntervalMs?: number }
+  | {
+      type: "init";
+      canvas: OffscreenCanvas;
+      statsIntervalMs?: number;
+      decoders?: DecoderChoices;
+    }
   | { type: "decode"; id: number; chunks: VideoChunk[] }
   | { type: "close" };
 

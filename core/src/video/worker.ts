@@ -20,6 +20,7 @@ scope.onmessage = (e) => {
         pipeline = new VideoPipeline({
           canvas: req.canvas,
           statsIntervalMs: req.statsIntervalMs,
+          decoders: req.decoders,
           onStats: (stats) => post({ type: "stats", stats }),
           onResize: (width, height) => post({ type: "resize", width, height }),
         });

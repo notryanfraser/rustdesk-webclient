@@ -3,7 +3,11 @@
 // the session, or a failure to connect, through onEnded.
 import { Fragment } from "preact";
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
-import { describeError, type ErrorDescription } from "@rustdesk-web/core";
+import {
+  describeError,
+  type ErrorDescription,
+  type VideoStats,
+} from "@rustdesk-web/core";
 import type { AppConfig } from "./config";
 import { ChatPanel } from "./ChatPanel";
 import { FilesPanel } from "./FilesPanel";
@@ -42,6 +46,10 @@ function useMediaQuery(query: string): boolean {
 }
 
 /** A touch screen as the main pointer (phones, tablets): show the key bar by default. */
+/** Stats overlay: the codec and, when known, whether its decoder is a hardware one. */
+const codecLabel = (v: VideoStats) =>
+  v.decoder ? `${v.codec} (${v.decoder} decoder)` : v.codec;
+
 const coarsePointer = () =>
   typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
 
@@ -507,15 +515,15 @@ export function SessionView(props: {
           <dl class="stats" aria-label="Statistics">
             <dt>{wantAll && shown ? `Display ${shown.index + 1}` : "Video"}</dt>
             <dd>
-              {v.fps.toFixed(0)} fps, {v.width}x{v.height} {v.codec}, decode{" "}
-              {v.decodeMs.toFixed(1)} ms
+              {v.fps.toFixed(0)} fps, {v.width}x{v.height} {codecLabel(v)},
+              decode {v.decodeMs.toFixed(1)} ms
             </dd>
             {Object.entries(snap!.videoOthers).map(([d, o]) => (
               <Fragment key={d}>
                 <dt>Display {Number(d) + 1}</dt>
                 <dd>
-                  {o.fps.toFixed(0)} fps, {o.width}x{o.height} {o.codec}, decode{" "}
-                  {o.decodeMs.toFixed(1)} ms
+                  {o.fps.toFixed(0)} fps, {o.width}x{o.height} {codecLabel(o)},
+                  decode {o.decodeMs.toFixed(1)} ms
                 </dd>
               </Fragment>
             ))}
