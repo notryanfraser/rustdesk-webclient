@@ -1,0 +1,540 @@
+[
+  {
+    "seq": 0,
+    "frame": 69,
+    "t": 14.24,
+    "stream": "id",
+    "direction": "browser->server",
+    "len": 61,
+    "schema": "RendezvousMessage",
+    "hex": "423b0a0934393633343533303110021a2c6f562b726b69583252744352433473592f796b4f722f35336b59386c364766583448744a7061786b42476b3d",
+    "decoded": {
+      "punchHoleRequest": {
+        "id": "496345301",
+        "natType": "SYMMETRIC",
+        "licenceKey": "oV+rkiX2RtCRC4sY/ykOr/53kY8l6GfX4HtJpaxkBGk="
+      }
+    }
+  },
+  {
+    "seq": 1,
+    "frame": 81,
+    "t": 14.243,
+    "stream": "id",
+    "direction": "server->browser",
+    "len": 188,
+    "schema": "RendezvousMessage",
+    "hex": "9a01b801122439336366613731342d356335652d346539312d396437332d3336343137356131356539611a1a727573746465736b2d72656c61792e6578616d706c652e6e65743a05312e352e332a6d92dc7705dc612692cc950ec4090b615dc62672912559c4c617d9535af656cf7e654b1eb743bec7c840f7bacb86ac60b7ace3f7a7e63029ad98f0ed48a151bf010a0934393633343533303112202bb7e5478cae06398e6d42d551151db01c027746e808e38b182358e85ee4a22c",
+    "decoded": {
+      "relayResponse": {
+        "uuid": "93cfa714-5c5e-4e91-9d73-364175a15e9a",
+        "relayServer": "rustdesk-relay.example.net",
+        "pk": "ktx3BdxhJpLMlQ7ECQthXcYmcpElWcTGF9lTWvZWz35lSx63Q77HyED3usuGrGC3rOP3p+YwKa2Y8O1IoVG/AQoJNDk2MzQ1MzAxEiArt+VHjK4GOY5tQtVRFR2wHAJ3RugI44sYI1joXuSiLA==",
+        "version": "1.5.3"
+      }
+    }
+  },
+  {
+    "seq": 2,
+    "frame": 151,
+    "t": 14.283,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 87,
+    "schema": "RendezvousMessage",
+    "hex": "920154122439336366613731342d356335652d346539312d396437332d333634313735613135653961322c6f562b726b69583252744352433473592f796b4f722f35336b59386c364766583448744a7061786b42476b3d",
+    "decoded": {
+      "requestRelay": {
+        "uuid": "93cfa714-5c5e-4e91-9d73-364175a15e9a",
+        "licenceKey": "oV+rkiX2RtCRC4sY/ykOr/53kY8l6GfX4HtJpaxkBGk="
+      }
+    }
+  },
+  {
+    "seq": 3,
+    "frame": 153,
+    "t": 14.284,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 115,
+    "schema": "Message",
+    "hex": "1a710a6f6735e77efef89f069df7d8cbb3ecabb101037ce6501fdb535895a7d4a442d35ad5414733d9b5c27da9fc531a88db19c25e65884933a0b24df2c0cafff74fd5030a093439363334353330311220e219b0ceb695080fede7e20827ca9df020abb603b01deba78de7692760fa996c2001",
+    "decoded": {
+      "signedId": {
+        "id": "ZzXnfv74nwad99jLs+yrsQEDfOZQH9tTWJWn1KRC01rVQUcz2bXCfan8UxqI2xnCXmWISTOgsk3ywMr/90/VAwoJNDk2MzQ1MzAxEiDiGbDOtpUID+3n4ggnyp3wIKu2A7Ad66eN52knYPqZbCAB"
+      }
+    }
+  },
+  {
+    "seq": 4,
+    "frame": 155,
+    "t": 14.293,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 86,
+    "schema": "Message",
+    "hex": "22540a202d86543e9221ef3112eed9edb7df367af67f326ab9556deaf37bcad2e52f9f5412302311265d5857f4b3db30e8a675ffd1881ce660ac92a6f4e3ea8df5b91a7d9f7f2fa7cdd773aec42c9380e4236425b420",
+    "decoded": {
+      "publicKey": {
+        "asymmetricValue": "LYZUPpIh7zES7tntt982evZ/Mmq5VW3q83vK0uUvn1Q=",
+        "symmetricValue": "IxEmXVhX9LPbMOimdf/RiBzmYKySpvTj6o31uRp9n38vp83Xc67ELJOA5CNkJbQg"
+      }
+    }
+  },
+  {
+    "seq": 5,
+    "frame": 181,
+    "t": 14.294,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 60,
+    "schema": null,
+    "hex": "204ca605be792e365637479448a6ca280810334fcca03c2a8ab3a60f4514eb84c69eb746fd982b47029b48df10508da7ece8b8959b6677fec57839f0",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 6,
+    "frame": 183,
+    "t": 14.297,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 41,
+    "schema": null,
+    "hex": "bfb00c897879d6a0ad1b5f47c2ebc6c4782d336680af7a7dd0b2a24600529290d986fe2feb88247c65",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 7,
+    "frame": 197,
+    "t": 14.301,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 18,
+    "schema": null,
+    "hex": "d3f719a3a38b7ce9373eadbd8824e4a87f5b",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 8,
+    "frame": 205,
+    "t": 14.336,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 18,
+    "schema": null,
+    "hex": "d3f719a3a38b7ce9373eadbd8824e4a87f5b",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 9,
+    "frame": 227,
+    "t": 15.296,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "1c4e90e945ff7b703c716a98b50ed37e4212a764",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 10,
+    "frame": 229,
+    "t": 15.303,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "1c4e90e945ff7b703c716a98b50ed37e4212a764",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 11,
+    "frame": 251,
+    "t": 16.296,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "431200871de4877c3d356414ba211536366b6d38",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 12,
+    "frame": 253,
+    "t": 16.304,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "431200871de4877c3d356414ba211536366b6d38",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 13,
+    "frame": 275,
+    "t": 17.296,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "d5e6dfdeff51299d3b6937c33fa55565493ae770",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 14,
+    "frame": 277,
+    "t": 17.302,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "d5e6dfdeff51299d3b6937c33fa55565493ae770",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 15,
+    "frame": 305,
+    "t": 18.297,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "32effe1ca75998791a5425a4f18def675312159f",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 16,
+    "frame": 307,
+    "t": 18.304,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "32effe1ca75998791a5425a4f18def675312159f",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 17,
+    "frame": 329,
+    "t": 19.296,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "20f6572d7b13bcc9f2eb33ae5e927b7a1ba3e141",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 18,
+    "frame": 331,
+    "t": 19.304,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "20f6572d7b13bcc9f2eb33ae5e927b7a1ba3e141",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 19,
+    "frame": 353,
+    "t": 20.296,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "6fea87b5c8718ca5e60c70d369863f495f395826",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 20,
+    "frame": 355,
+    "t": 20.302,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "6fea87b5c8718ca5e60c70d369863f495f395826",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 21,
+    "frame": 377,
+    "t": 21.296,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "1b9e013f946e78df708f3b144c4841fa0c90ba3a",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 22,
+    "frame": 379,
+    "t": 21.301,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "1b9e013f946e78df708f3b144c4841fa0c90ba3a",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 23,
+    "frame": 407,
+    "t": 22.297,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "d8392e6c165c366a76e82b03afb419ab7a2439a4",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 24,
+    "frame": 409,
+    "t": 22.304,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "d8392e6c165c366a76e82b03afb419ab7a2439a4",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 25,
+    "frame": 431,
+    "t": 23.297,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "3d0092d9090339e797ea2fe7f6b2c30dda44792f",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 26,
+    "frame": 433,
+    "t": 23.301,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "3d0092d9090339e797ea2fe7f6b2c30dda44792f",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 27,
+    "frame": 455,
+    "t": 24.297,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "9ad5b637e85f8b29cec9b65c51753bbbb1eee597",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 28,
+    "frame": 457,
+    "t": 24.302,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "9ad5b637e85f8b29cec9b65c51753bbbb1eee597",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 29,
+    "frame": 479,
+    "t": 25.297,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "2a6c1c5c741f75ca4d686bf96a95b1cb6d7fdd81",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 30,
+    "frame": 481,
+    "t": 25.309,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "2a6c1c5c741f75ca4d686bf96a95b1cb6d7fdd81",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 31,
+    "frame": 503,
+    "t": 26.297,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "559927dfb43444fe5e799b430ce213768a821d24",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 32,
+    "frame": 505,
+    "t": 26.303,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "559927dfb43444fe5e799b430ce213768a821d24",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 33,
+    "frame": 533,
+    "t": 27.297,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "1c5c3caf2e0c6ac706c5962dbc533e20da24e33e",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 34,
+    "frame": 535,
+    "t": 27.306,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "1c5c3caf2e0c6ac706c5962dbc533e20da24e33e",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 35,
+    "frame": 557,
+    "t": 28.296,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "73e703bf9dd3ed1378118e49f4d4190a3dd31b8f",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 36,
+    "frame": 559,
+    "t": 28.309,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "73e703bf9dd3ed1378118e49f4d4190a3dd31b8f",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 37,
+    "frame": 611,
+    "t": 29.297,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "ef73dc2855feb5af7d1456477163c0ee83639e7b",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 38,
+    "frame": 621,
+    "t": 29.341,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "ef73dc2855feb5af7d1456477163c0ee83639e7b",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 39,
+    "frame": 655,
+    "t": 30.297,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "b5486d5f64b6b9779d57f151f47df9836efeedfc",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 40,
+    "frame": 659,
+    "t": 30.307,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "b5486d5f64b6b9779d57f151f47df9836efeedfc",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 41,
+    "frame": 681,
+    "t": 31.297,
+    "stream": "relay",
+    "direction": "server->browser",
+    "len": 20,
+    "schema": null,
+    "hex": "73f6a86edc3fa2ed689dc90de9cbea0f6755772a",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  },
+  {
+    "seq": 42,
+    "frame": 683,
+    "t": 31.313,
+    "stream": "relay",
+    "direction": "browser->server",
+    "len": 20,
+    "schema": null,
+    "hex": "73f6a86edc3fa2ed689dc90de9cbea0f6755772a",
+    "decoded": null,
+    "note": "opaque: secretbox-encrypted after key exchange (not decodable without the session key)"
+  }
+]

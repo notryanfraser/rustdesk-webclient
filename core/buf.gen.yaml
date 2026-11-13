@@ -1,0 +1,10 @@
+version: v2
+clean: true
+plugins:
+  # protoc-gen-es is a pure-JS plugin from node_modules/.bin; buf (npm
+  # package @bufbuild/buf) parses the .proto files itself, so no native protoc
+  # install is needed on a Mac or in CI.
+  - local: protoc-gen-es
+    out: src/gen
+    opt:
+      - target=ts

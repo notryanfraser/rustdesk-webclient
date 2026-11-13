@@ -1,0 +1,43 @@
+{
+  "name": "@rustdesk-web/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TypeScript protocol core for rustdesk-web",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "scripts": {
+    "gen": "node scripts/gen.mjs",
+    "gen:keymap": "node scripts/gen-keymap.mjs",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.17.0",
+    "fzstd": "0.1.1",
+    "tweetnacl": "1.0.3"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "1.75.0",
+    "@bufbuild/protoc-gen-es": "2.17.0",
+    "esbuild": "0.28.2",
+    "playwright-core": "1.64.0",
+    "prettier": "3.10.1",
+    "typescript": "5.9.3",
+    "vitest": "5.1.0"
+  }
+}

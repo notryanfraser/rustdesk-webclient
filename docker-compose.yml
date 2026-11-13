@@ -1,0 +1,56 @@
+# rustdesk-web together with RustDesk's own ID server (hbbs) and relay (hbbr).
+# Already run hbbs/hbbr? See "Already running a RustDesk server" in the README.
+#
+# Your reverse proxy joins the `rustdesk` network and terminates TLS for the browser:
+#   https://RUSTDESK_HOST       -> rustdesk-web:8080   (the web client)
+#   https://RUSTDESK_HOST:21118 -> hbbs:21118          (WebSocket to the ID server)
+#   https://RUSTDESK_HOST:21119 -> hbbr:21119          (WebSocket to the relay)
+# Only the native RustDesk ports are published here; 21118, 21119 and 8080 stay inside the
+# network so the proxy can own them. Guides: docs/proxy/.
+name: rustdesk
+
+services:
+  hbbs:
+    image: rustdesk/rustdesk-server:1.1.16
+    # -r: the relay address handed to clients (native clients add :21117, browsers :21119).
+    command: hbbs -r ${RUSTDESK_HOST:?set RUSTDESK_HOST in .env}
+    restart: unless-stopped
+    volumes:
+      - ./data:/root
+    ports:
+      - "21115:21115"
+      - "21116:21116"
+      - "21116:21116/udp"
+    depends_on:
+      - hbbr
+
+  hbbr:
+    image: rustdesk/rustdesk-server:1.1.16
+    command: hbbr
+    restart: unless-stopped
+    volumes:
+      - ./data:/root
+    ports:
+      - "21117:21117"
+
+  rustdesk-web:
+    image: ghcr.io/notryanfraser/rustdesk-webclient:1
+    # Or build it from this checkout:  build: { context: ., dockerfile: docker/Dockerfile }
+    restart: unless-stopped
+    environment:
+      RUSTDESK_ID_SERVER: ${RUSTDESK_HOST:?set RUSTDESK_HOST in .env}
+      # Empty until step 2 of the README; the container will not start without it.
+      RUSTDESK_KEY: ${RUSTDESK_KEY:-}
+    # Hardening: the container only serves static files.
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /var/cache/nginx:uid=101,gid=101,mode=0755
+      - /tmp
+      - /run:uid=101,gid=101,mode=0755
+
+networks:
+  default:
+    name: rustdesk

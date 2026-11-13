@@ -1,0 +1,694 @@
+:root {
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --text: #1c1e21;
+  --muted: #5f6670;
+  --accent: #2563eb;
+  --danger: #c62828;
+  --border: #d5d9df;
+  --bar: #1f2328;
+  --bar-text: #e8eaed;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  color-scheme: light dark;
+}
+/* Theme: follows the system unless the user picked one (settings.ts sets data-theme). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a;
+    --panel: #1e2125;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --accent: #60a5fa;
+    --danger: #ef5350;
+    --border: #33383e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a;
+  --panel: #1e2125;
+  --text: #e8eaed;
+  --muted: #9aa0a6;
+  --accent: #60a5fa;
+  --danger: #ef5350;
+  --border: #33383e;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+#app {
+  height: 100%;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+
+/* Connect screen */
+.connect {
+  max-width: 26rem;
+  margin: 10vh auto 2rem;
+  padding: env(safe-area-inset-top) calc(1rem + env(safe-area-inset-right))
+    env(safe-area-inset-bottom) calc(1rem + env(safe-area-inset-left));
+}
+.connect h1 {
+  font-size: 1.5rem;
+  margin: 0 0 1.5rem;
+}
+.connect form {
+  display: grid;
+  gap: 0.9rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 1.2rem;
+}
+.connect label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.connect input {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--bg);
+  color: var(--text);
+}
+.connect button[type="submit"] {
+  padding: 0.6rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+.connect button[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.error,
+.notice {
+  margin-top: 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.4rem;
+}
+.error {
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+.error p {
+  margin: 0 0 0.4rem;
+}
+.error code {
+  font-size: 0.8rem;
+  color: var(--muted);
+  word-break: break-word;
+}
+.notice {
+  color: var(--muted);
+}
+.recent h2 {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 1.5rem 0 0.5rem;
+}
+.recent ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.recent li {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.recent button {
+  background: none;
+  border: 0;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.5rem 0.3rem;
+}
+.recent .peer {
+  flex: 1;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.recent .forget {
+  color: var(--muted);
+}
+
+/* Session */
+/* The session fills the visible viewport (main.tsx tracks visualViewport: phone browser bars and
+   the on-screen keyboard excluded); 100dvh where that is not available. */
+.session {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--vv-top, 0);
+  height: var(--vv-height, 100dvh);
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+/* Under the status bar / notch with viewport-fit=cover: pad by the safe area. */
+.toolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: calc(0.3rem + env(safe-area-inset-top))
+    calc(0.5rem + env(safe-area-inset-right)) 0.3rem
+    calc(0.5rem + env(safe-area-inset-left));
+  background: var(--bar);
+  color: var(--bar-text);
+  font-size: 0.85rem;
+  min-width: 0;
+}
+.toolbar .peer {
+  font-weight: 600;
+  margin-right: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toolbar > button,
+.toolbar > select {
+  flex: none;
+}
+/* The "⋯" menu (narrow screens) */
+.toolbar .menu {
+  position: absolute;
+  top: 100%;
+  right: calc(0.5rem + env(safe-area-inset-right));
+  z-index: 5;
+  display: grid;
+  gap: 0.3rem;
+  min-width: 12rem;
+  padding: 0.4rem;
+  background: var(--bar);
+  border: 1px solid #444c56;
+  border-radius: 0 0 0.4rem 0.4rem;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.4);
+}
+.toolbar .menu button,
+.toolbar .menu select {
+  text-align: left;
+  width: 100%;
+}
+.toolbar .spacer {
+  flex: 1;
+}
+.toolbar button,
+.toolbar select {
+  background: #2d333b;
+  color: var(--bar-text);
+  border: 1px solid #444c56;
+  border-radius: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+.toolbar button[aria-pressed="true"] {
+  background: #3b4a63;
+}
+.toolbar button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.toolbar .danger {
+  border-color: var(--danger);
+}
+/* Touch screens: controls big enough for a finger. */
+@media (pointer: coarse) {
+  .toolbar {
+    font-size: 0.95rem;
+  }
+  .toolbar button,
+  .toolbar select {
+    min-height: 2.5rem;
+    min-width: 2.5rem;
+  }
+}
+/* No key bar: keep the remote screen above the home indicator. */
+.session:not(:has(.keybar)) .screen {
+  margin-bottom: env(safe-area-inset-bottom);
+}
+.screen {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden; /* a pinch-zoomed canvas (touch.ts) stays inside */
+}
+.screen canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  outline: none;
+  cursor: default;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  color: #ddd;
+  background: #000;
+}
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #555;
+  border-top-color: #ddd;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+.stats {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  margin: 0;
+  padding: 0.4rem 0.6rem;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.1rem 0.6rem;
+  font:
+    12px/1.4 ui-monospace,
+    monospace;
+  color: #8f8;
+  background: rgb(0 0 0 / 0.7);
+  border-radius: 0.3rem;
+  pointer-events: none;
+}
+.stats dd {
+  margin: 0;
+}
+
+/* Files panel */
+.files {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(30rem, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  overflow: auto;
+  background: var(--panel);
+  color: var(--text);
+  border-left: 1px solid var(--border);
+  font-size: 0.85rem;
+  box-shadow: -4px 0 16px rgb(0 0 0 / 0.3);
+}
+.files.dragging {
+  outline: 3px dashed var(--accent);
+  outline-offset: -6px;
+}
+.files header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.files h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+.files h3 {
+  font-size: 0.85rem;
+  margin: 0.4rem 0;
+  color: var(--muted);
+}
+.files button {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+}
+.files button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.files button.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.files .pathbar {
+  display: flex;
+  gap: 0.3rem;
+}
+.files .pathbar input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+}
+.files .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.files .listing {
+  width: 100%;
+  border-collapse: collapse;
+}
+.files .listing th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: normal;
+}
+.files .listing td,
+.files .listing th {
+  padding: 0.2rem 0.3rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.files .listing td:nth-child(2) {
+  white-space: normal;
+  word-break: break-all;
+}
+.files .listing tr.selected {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.files .listing button.dir {
+  border: 0;
+  background: none;
+  padding: 0;
+  text-align: left;
+}
+.files .hint {
+  color: var(--muted);
+  margin: 0;
+}
+.files .transfers ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.files .transfers li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.5rem;
+}
+.files .transfers progress {
+  width: 100%;
+}
+.files .transfers .detail {
+  color: var(--muted);
+  grid-column: 1;
+}
+.files .transfers li[data-state="failed"] .detail {
+  color: var(--danger);
+}
+
+/* View settings panel */
+.view-settings {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 0.6rem;
+  align-items: center;
+  padding: 0.7rem;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0 0 0 0.4rem;
+  font-size: 0.85rem;
+  box-shadow: -4px 4px 16px rgb(0 0 0 / 0.3);
+}
+.view-settings select,
+.view-settings input {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  padding: 0.2rem 0.3rem;
+}
+.view-settings .note {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  margin: 0;
+  max-width: 18rem;
+}
+/* Scaling "original": one remote pixel per CSS pixel, scrolling when larger than the window. */
+.screen.original {
+  overflow: auto;
+}
+.screen.original canvas {
+  max-width: none;
+  max-height: none;
+}
+
+/* Key bar for touch devices */
+.keybar {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0.35rem calc(0.35rem + env(safe-area-inset-right))
+    calc(0.35rem + env(safe-area-inset-bottom))
+    calc(0.35rem + env(safe-area-inset-left));
+  flex: none;
+  overflow-x: auto;
+  background: var(--bar);
+  color: var(--bar-text);
+  position: relative;
+}
+.keybar button {
+  flex: none;
+  min-width: 2.6rem;
+  min-height: 2.4rem;
+  padding: 0 0.6rem;
+  border: 1px solid #444b53;
+  border-radius: 0.35rem;
+  background: #2b3036;
+  color: var(--bar-text);
+  font-size: 0.95rem;
+}
+.keybar button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+/* Focusable (so the soft keyboard opens) but invisible; iOS will not focus display:none. */
+.keybar .soft-keyboard {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  border: 0;
+  padding: 0;
+  resize: none;
+  font-size: 16px; /* below 16px iOS zooms the page on focus */
+}
+.screen canvas {
+  touch-action: none;
+}
+
+/* Phones: panels take the full width. */
+@media (max-width: 759px) {
+  .view-settings {
+    left: 0;
+    right: 0;
+    border-radius: 0;
+    max-height: 100%;
+    overflow: auto;
+  }
+  .files {
+    width: 100%;
+  }
+}
+
+/* Chat */
+.toolbar .badge {
+  display: inline-block;
+  min-width: 1.2em;
+  margin-left: 0.35rem;
+  padding: 0 0.3em;
+  border-radius: 0.6em;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.75em;
+  line-height: 1.2em;
+  text-align: center;
+}
+.chat {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  width: min(24rem, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  background: var(--panel);
+  color: var(--text);
+  border-left: 1px solid var(--border);
+  font-size: 0.9rem;
+  box-shadow: -4px 0 16px rgb(0 0 0 / 0.3);
+}
+.chat header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chat h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+.chat button {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+.chat button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.chat .messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.chat .messages li {
+  max-width: 85%;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.chat .messages li.me {
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--accent) 18%, var(--panel));
+}
+.chat .messages li.empty {
+  max-width: none;
+  color: var(--muted);
+  border: 0;
+  background: none;
+}
+.chat .who {
+  font-weight: 600;
+  margin-right: 0.4rem;
+}
+.chat time {
+  color: var(--muted);
+  font-size: 0.8em;
+}
+.chat .messages p {
+  margin: 0.2rem 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.chat form {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-end;
+}
+.chat textarea {
+  flex: 1;
+  resize: none;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: max(16px, 1em); /* below 16px iOS zooms the page on focus */
+}
+
+/* All displays at once: side by side, each as wide as its share (flex-grow = its width) */
+.screen.multi {
+  display: flex;
+  gap: 2px;
+}
+.screen.multi canvas {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+}
+
+/* Recording */
+.toolbar .rec {
+  flex: none;
+  color: #ff5a5a;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.rec-note {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  margin: 0;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  max-width: min(36rem, calc(100% - 1rem));
+  padding: 0.45rem 0.7rem;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--danger);
+  border-radius: 0.4rem;
+  font-size: 0.9rem;
+}
+.rec-note button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}

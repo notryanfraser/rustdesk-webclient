@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    // moduleResolution "bundler": the consumer is a browser app (Vite/esbuild),
+    // so we resolve like a bundler does. Relative imports still carry explicit
+    // ".js" extensions (protoc-gen-es emits them), so the output also works
+    // under native Node ESM.
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": []
+  },
+  "include": ["src", "test", "vitest.config.ts"]
+}

@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: core
+    steps:
+      # Actions pinned to full commit SHAs (tag in comment).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: core/package-lock.json
+      - run: npm ci
+      - name: Generated code is up to date
+        run: |
+          npm run gen
+          npm run gen:keymap
+          git add -N src/gen src/input/keymap.gen.ts
+          git diff --exit-code -- src/gen src/input/keymap.gen.ts
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            core/package-lock.json
+            app/package-lock.json
+      # The app uses the core from source; the core's own imports resolve from core/node_modules.
+      - run: npm ci --omit=dev
+        working-directory: core
+      - run: npm ci
+        working-directory: app
+      - run: npm run format:check
+        working-directory: app
+      - run: npm run typecheck
+        working-directory: app
+      - run: npm run build
+        working-directory: app
+      - name: Image builds
+        run: docker build -f docker/Dockerfile -t rustdesk-web:ci .

@@ -1,0 +1,27 @@
+{
+  "name": "@rustdesk-web/app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Browser UI for rustdesk-web (Preact, built with esbuild)",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --serve",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "preact": "10.29.8"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "playwright-core": "1.64.0",
+    "prettier": "3.10.1",
+    "typescript": "5.9.3"
+  }
+}

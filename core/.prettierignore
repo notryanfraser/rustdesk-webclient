@@ -1,0 +1,9 @@
+node_modules
+dist
+protos
+src/gen
+package-lock.json
+fixtures
+e2e/dist
+vendor
+src/input/keymap.gen.ts
