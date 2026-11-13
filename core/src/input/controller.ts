@@ -12,6 +12,9 @@
 // * Every key and button pressed through us is released on the peer when focus is lost or
 // the page is hidden, so nothing stays stuck down on the remote (the native client does the
 // same with its TO_RELEASE set, src/keyboard.rs).
+// * Ctrl+Alt+Shift pressed together with no other key, then released, is the escape chord
+// (as in Guacamole): onEscapeChord fires so the app can take focus back from the canvas.
+// The modifier presses already went to the peer, so everything held is released on it first.
 // * Pointer moves are sent only when the remote position changes (several CSS px can map to
 // one remote px when the view is scaled down).
 
@@ -70,6 +73,13 @@ export interface InputControllerOptions {
    * gesture layer that drives pointerMove / pointerButton / scroll itself.
    */
   touch?: "mouse" | "app";
+  /**
+   * Called when Ctrl+Alt+Shift (either side) is pressed together with no other key and then
+   * released, so a keyboard user can leave the canvas. Fixed chord, not configurable. Whatever
+   * the peer was sent as held is released first; with another key pressed meanwhile (say
+   * Ctrl+Alt+Shift+T) it is an ordinary shortcut and this does not fire. Unset: no chord.
+   */
+  onEscapeChord?: () => void;
 }
 
 /** Where and how a pointer acts, in client (CSS) coordinates; the DOM button numbering. */
@@ -122,8 +132,17 @@ export class InputController {
     on("pointerup", (e) => mine(e) && this.onPointerButton(e, false));
     on("wheel", (e) => this.onWheel(e));
     on("contextmenu", (e) => e.preventDefault());
-    on("keydown", (e) => this.onKey(e, true));
-    on("keyup", (e) => this.onKey(e, false));
+    on("keydown", (e) => {
+      this.onKey(e, true);
+      this.trackChord(e.code, true);
+    });
+    on("keyup", (e) => {
+      this.onKey(e, false);
+      if (this.trackChord(e.code, false)) {
+        this.releaseAll();
+        opts.onEscapeChord?.();
+      }
+    });
     on("blur", () => this.releaseAll());
     document.addEventListener(
       "visibilitychange",
@@ -350,7 +369,40 @@ export class InputController {
     this.queueOrSendKey(ev, paste);
   }
 
+  /** Chord state: modifier families down, whether all three were, and whether a key broke it. */
+  private readonly chordMods = new Set<string>();
+  private chordArmed = false;
+  private chordBroken = false;
+
+  /** Feed every key event; true on the release that completes the escape chord. */
+  private trackChord(code: string, down: boolean): boolean {
+    if (!this.opts.onEscapeChord) return false;
+    if (!/^(Control|Alt|Shift)(Left|Right)$/.test(code)) {
+      if (down && this.chordMods.size) this.chordBroken = true;
+      return false;
+    }
+    // Codes are kept per side so releasing one Shift while the other is held is no release.
+    if (down) {
+      this.chordMods.add(code);
+      if (this.chordFamilies() === 3) this.chordArmed = true;
+      return false;
+    }
+    this.chordMods.delete(code);
+    const fire = this.chordArmed && !this.chordBroken;
+    this.chordArmed = false; // fire once, on the first release
+    if (!this.chordMods.size) this.chordBroken = false;
+    return fire;
+  }
+
+  private chordFamilies(): number {
+    return new Set([...this.chordMods].map((c) => c.replace(/Left|Right/, "")))
+      .size;
+  }
+
   private releaseAll(): void {
+    this.chordMods.clear();
+    this.chordArmed = false;
+    this.chordBroken = false;
     const q = this.keyQueue ?? [];
     this.keyQueue = undefined;
     for (const k of q) this.sendKey(k);

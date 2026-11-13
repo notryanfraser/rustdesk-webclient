@@ -120,6 +120,8 @@ export interface ConnectArgs {
   quality?: QualityOptions;
   /** Saved keyboard mode for this peer. */
   keyboardMode?: KeyboardInputMode;
+  /** Ctrl+Alt+Shift pressed and released alone: the way out of the canvas for keyboard users. */
+  onEscapeChord?: () => void;
 }
 
 export class LiveSession {
@@ -148,6 +150,7 @@ export class LiveSession {
     private readonly early: EarlyState = { recordingAllowed: true },
     /** What the browser decodes (probeDecoders()), for the other displays' workers. */
     private readonly decoders: DecoderChoices = {},
+    private readonly onEscapeChord?: () => void,
   ) {
     this.keyboardMode = keyboardMode;
     this.primarySink = primarySink;
@@ -190,6 +193,7 @@ export class LiveSession {
       keyboardMode,
       // Touch is the gesture layer's (touch.ts): taps, long-press, drag, pinch-zoom.
       touch: "app",
+      onEscapeChord,
     });
     this.clipboard = new ClipboardSync(
       canvas,
@@ -312,6 +316,7 @@ export class LiveSession {
         tee,
         early,
         decoders,
+        a.onEscapeChord,
       );
       return live;
     } catch (e) {
@@ -328,6 +333,11 @@ export class LiveSession {
   subscribe(fn: () => void): () => void {
     this.listeners.add(fn);
     return () => this.listeners.delete(fn);
+  }
+
+  /** Write the remote's clipboard text the browser refused earlier (a button click is a gesture). */
+  copyPendingClipboard(): void {
+    this.clipboard?.flushPending();
   }
 
   /** Audio stats arrive through the player's callback, owned by the view. */
@@ -413,6 +423,7 @@ export class LiveSession {
           isPasteShortcut,
           keyboardMode: this.keyboardMode,
           touch: "app",
+          onEscapeChord: this.onEscapeChord,
         }),
       };
       this.others.set(index, view);

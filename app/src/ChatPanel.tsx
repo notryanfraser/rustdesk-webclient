@@ -1,25 +1,22 @@
 // Chat panel: messages with the person at the remote machine, for this session only. On
 // the remote they appear in RustDesk's connection window ("Write a message"). Text is rendered as
-// text, never as HTML.
+// text, never as HTML. The dock (SessionView) supplies the header and moves focus to the message
+// box when the panel opens.
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { ChatEntry } from "./live";
 
 export function ChatPanel(props: {
-  peerId: string;
   entries: ChatEntry[];
   onSend: (text: string) => void;
-  onClose: () => void;
 }) {
   const [draft, setDraft] = useState("");
   const list = useRef<HTMLOListElement>(null);
-  const input = useRef<HTMLTextAreaElement>(null);
 
   // Newest at the bottom, kept in view.
   useEffect(() => {
     const el = list.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [props.entries.length]);
-  useEffect(() => input.current?.focus(), []);
 
   const send = () => {
     if (!draft.trim()) return;
@@ -28,13 +25,7 @@ export function ChatPanel(props: {
   };
 
   return (
-    <aside class="chat" aria-label="Chat">
-      <header>
-        <h2>Chat with {props.peerId}</h2>
-        <button type="button" onClick={props.onClose} aria-label="Close chat">
-          ×
-        </button>
-      </header>
+    <div class="chat">
       <ol ref={list} class="messages" aria-label="Messages" aria-live="polite">
         {props.entries.length === 0 && (
           <li class="empty">
@@ -62,7 +53,6 @@ export function ChatPanel(props: {
         }}
       >
         <textarea
-          ref={input}
           aria-label="Type a message"
           rows={2}
           value={draft}
@@ -79,6 +69,6 @@ export function ChatPanel(props: {
           Send
         </button>
       </form>
-    </aside>
+    </div>
   );
 }

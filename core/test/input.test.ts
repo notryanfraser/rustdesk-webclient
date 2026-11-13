@@ -1,10 +1,11 @@
 // Input mapping: browser key codes -> peer-native codes (upstream rdev tables), lock-state
 // modifiers, Pause and Ctrl+Alt+Del special cases, pointer -> remote coordinates, wheel notches.
 // The live check (keys and clicks observed with xev on the peer) is e2e/input-run.mjs.
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   CODE_TO_RDEV_KEY,
   ControlKey,
+  InputController,
   KeyboardMode,
   MOUSE_BUTTON,
   MOUSE_TYPE,
@@ -20,6 +21,7 @@ import {
   isCharacterKey,
   textKeyEvent,
   translateKeyEvents,
+  type KeyEvent,
   type TranslateKey,
 } from "../src/index.js";
 
@@ -395,5 +397,154 @@ describe("translate mode", () => {
     const e = textKeyEvent("hello wörld");
     expect(e.union).toEqual({ case: "seq", value: "hello wörld" });
     expect(e.mode).toBe(KeyboardMode.Translate);
+  });
+});
+
+describe("escape chord (Ctrl+Alt+Shift)", () => {
+  // Node has no DOM: a bare element and document are enough for the controller's listeners.
+  type Handler = (e: unknown) => void;
+  function setup(opts: { chord?: boolean; mode?: "map" | "translate" } = {}) {
+    const handlers: Record<string, Handler> = {};
+    const element = {
+      tabIndex: -1,
+      style: {},
+      addEventListener: (t: string, f: Handler) => (handlers[t] = f),
+    } as unknown as HTMLElement;
+    vi.stubGlobal("document", {
+      addEventListener: () => {},
+      hidden: false,
+    });
+    const sent: { code: number | string; down: boolean }[] = [];
+    let fired = 0;
+    const input = new InputController({
+      element,
+      send: () => {},
+      peerPlatform: "Linux",
+      geometry: { x: 0, y: 0, width: 100, height: 100 },
+      keyboardMode: opts.mode,
+      onSent: (_k, ev) => {
+        const k = ev as KeyEvent;
+        sent.push({
+          code: k.union.value as number | string,
+          down: k.down,
+        });
+      },
+      ...(opts.chord === false ? {} : { onEscapeChord: () => fired++ }),
+    });
+    const key = (type: "keydown" | "keyup", code: string, key = code) =>
+      handlers[type]!({
+        code,
+        key,
+        isComposing: false,
+        altKey: false,
+        ctrlKey: false,
+        shiftKey: false,
+        metaKey: false,
+        getModifierState: () => false,
+        preventDefault: () => {},
+      });
+    return {
+      input,
+      sent,
+      fired: () => fired,
+      down: (c: string, k?: string) => key("keydown", c, k),
+      up: (c: string, k?: string) => key("keyup", c, k),
+    };
+  }
+  const downs = (s: { code: unknown; down: boolean }[]) =>
+    s.filter((e) => e.down).length;
+  const ups = (s: { code: unknown; down: boolean }[]) =>
+    s.filter((e) => !e.down).length;
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  for (const mode of ["map", "translate"] as const) {
+    it(`fires once on release and leaves the peer with no key held (${mode})`, () => {
+      const t = setup({ mode });
+      t.down("ControlLeft", "Control");
+      t.down("AltLeft", "Alt");
+      t.down("ShiftLeft", "Shift");
+      expect(t.fired()).toBe(0);
+      t.up("ShiftLeft", "Shift");
+      expect(t.fired()).toBe(1);
+      t.up("AltLeft", "Alt");
+      t.up("ControlLeft", "Control");
+      expect(t.fired()).toBe(1);
+      expect(downs(t.sent)).toBe(3);
+      expect(ups(t.sent)).toBe(3);
+    });
+  }
+
+  it("releases the other modifiers on the peer before the callback runs", () => {
+    const t = setup();
+    t.down("ControlLeft");
+    t.down("AltLeft");
+    t.down("ShiftLeft");
+    t.up("ControlLeft");
+    expect(ups(t.sent)).toBe(3);
+    expect(t.fired()).toBe(1);
+  });
+
+  it("does not fire when another key is pressed (Ctrl+Alt+Shift+T)", () => {
+    const t = setup();
+    t.down("ControlLeft");
+    t.down("AltLeft");
+    t.down("ShiftLeft");
+    t.down("KeyT", "T");
+    t.up("KeyT", "T");
+    t.up("ShiftLeft");
+    t.up("AltLeft");
+    t.up("ControlLeft");
+    expect(t.fired()).toBe(0);
+    expect(t.sent.length).toBe(8);
+    // a fresh clean chord afterwards still works
+    t.down("ControlLeft");
+    t.down("AltLeft");
+    t.down("ShiftLeft");
+    t.up("ControlLeft");
+    expect(t.fired()).toBe(1);
+  });
+
+  it("does not fire for Ctrl+Alt alone", () => {
+    const t = setup();
+    t.down("ControlLeft");
+    t.down("AltLeft");
+    t.up("AltLeft");
+    t.up("ControlLeft");
+    expect(t.fired()).toBe(0);
+    expect(t.sent.length).toBe(4);
+  });
+
+  it("sends the same events as without the option", () => {
+    const run = (chord: boolean) => {
+      const t = setup({ chord });
+      t.down("ControlLeft");
+      t.down("AltLeft");
+      t.down("ShiftLeft");
+      t.up("ShiftLeft");
+      t.up("AltLeft");
+      t.up("ControlLeft");
+      t.down("KeyA", "a");
+      t.up("KeyA", "a");
+      return t.sent;
+    };
+    expect(run(true).length).toBe(8);
+    expect(run(false)).toEqual(run(true));
+    const off = setup({ chord: false });
+    off.down("ControlLeft");
+    off.down("AltLeft");
+    off.down("ShiftLeft");
+    off.up("ShiftLeft");
+    expect(off.fired()).toBe(0);
+  });
+
+  it("accepts right-hand variants", () => {
+    const t = setup();
+    t.down("ControlRight");
+    t.down("AltLeft");
+    t.down("ShiftRight");
+    t.up("AltLeft");
+    expect(t.fired()).toBe(1);
+    expect(ups(t.sent)).toBe(3);
   });
 });

@@ -16,6 +16,8 @@ export type Phase =
       error?: ErrorDescription;
       notice?: string;
       peerId?: string;
+      /** The failed attempt's password, in memory only, so Reconnect is one click. */
+      reconnect?: { peerId: string; password: string; dropped: boolean };
     }
   | {
       kind: "session";
@@ -57,7 +59,16 @@ function App({ config }: { config: AppConfig }) {
         error={phase.error}
         notice={phase.notice}
         initialPeerId={phase.peerId}
+        reconnect={phase.reconnect}
         onConnect={connect}
+        onForgetPassword={() =>
+          setPhase((p) =>
+            p.kind === "connect" && p.reconnect
+              ? { ...p, reconnect: undefined }
+              : p,
+          )
+        }
+        onDismiss={() => setPhase({ kind: "connect", peerId: phase.peerId })}
       />
     );
   return (
@@ -65,8 +76,21 @@ function App({ config }: { config: AppConfig }) {
       key={phase.attempt}
       config={config}
       phase={phase}
-      onEnded={(error, notice) =>
-        setPhase({ kind: "connect", error, notice, peerId: phase.peerId })
+      onEnded={(error, notice, dropped) =>
+        setPhase({
+          kind: "connect",
+          error,
+          notice,
+          peerId: phase.peerId,
+          // Only a failure offers Reconnect; a disconnect or cancel does not.
+          reconnect: error
+            ? {
+                peerId: phase.peerId,
+                password: phase.password,
+                dropped: !!dropped,
+              }
+            : undefined,
+        })
       }
     />
   );

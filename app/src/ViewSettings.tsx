@@ -1,6 +1,7 @@
-// View settings panel: image quality, frame rate and scaling for this peer (saved per peer
-// by the session view), and the app theme (saved for the app).
-import { useState } from "preact/hooks";
+// Settings panel: "This remote" (image quality, frame rate, scaling, keyboard: saved per peer by
+// the session view) and "This device" (touch input and theme: saved for the app).
+import type { ComponentChildren } from "preact";
+import { useId, useState } from "preact/hooks";
 import {
   CUSTOM_QUALITY_MAX,
   CUSTOM_QUALITY_MIN,
@@ -10,18 +11,63 @@ import {
   applyTheme,
   loadTheme,
   type PeerSettings,
+  type PointerMode,
   type Scaling,
   type Theme,
 } from "./settings";
 
 const FPS_CHOICES = [5, 10, 15, 20, 30, 45, 60, 90, 120];
 
+// No saved choice means the peer's default, Balanced.
 const qualityKey = (q: ImageQualitySetting | undefined) =>
-  q === undefined ? "default" : typeof q === "string" ? q : "custom";
+  q === undefined ? "balanced" : typeof q === "string" ? q : "custom";
+
+/**
+ * A segmented control made of native radios: the group, the arrow keys and the checked state come
+ * from the browser. The choices wrap onto more lines when they do not fit.
+ */
+function Segmented<T extends string>(props: {
+  label: string;
+  value: T;
+  options: [T, string][];
+  onChange: (v: T) => void;
+  hint?: ComponentChildren;
+}) {
+  const id = useId();
+  return (
+    <fieldset
+      class="field"
+      aria-describedby={props.hint ? `${id}-hint` : undefined}
+    >
+      <legend>{props.label}</legend>
+      <div class="seg">
+        {props.options.map(([v, text]) => (
+          <label key={v}>
+            <input
+              type="radio"
+              name={id}
+              value={v}
+              checked={props.value === v}
+              onChange={() => props.onChange(v)}
+            />
+            <span>{text}</span>
+          </label>
+        ))}
+      </div>
+      {props.hint && (
+        <p class="field-hint" id={`${id}-hint`}>
+          {props.hint}
+        </p>
+      )}
+    </fieldset>
+  );
+}
 
 export function ViewSettings(props: {
   settings: PeerSettings;
   onChange: (s: PeerSettings) => void;
+  pointerMode: PointerMode;
+  onPointerMode: (m: PointerMode) => void;
 }) {
   const s = props.settings;
   const [theme, setTheme] = useState<Theme>(loadTheme);
@@ -31,34 +77,29 @@ export function ViewSettings(props: {
   const setQuality = (key: string) =>
     props.onChange({
       ...s,
-      quality:
-        key === "default"
-          ? undefined
-          : key === "custom"
-            ? { custom }
-            : (key as ImageQualitySetting),
+      quality: key === "custom" ? { custom } : (key as ImageQualitySetting),
     });
 
   return (
     <form
       class="view-settings"
-      aria-label="View settings"
+      aria-label="Settings"
       onSubmit={(e) => e.preventDefault()}
     >
-      <label for="vs-quality">Quality</label>
-      <select
-        id="vs-quality"
+      <h3>This remote</h3>
+      <Segmented
+        label="Image quality"
         value={qualityKey(s.quality)}
-        onChange={(e) => setQuality(e.currentTarget.value)}
-      >
-        <option value="default">Default (balanced)</option>
-        <option value="low">Low (less bandwidth)</option>
-        <option value="balanced">Balanced</option>
-        <option value="best">Best</option>
-        <option value="custom">Custom…</option>
-      </select>
+        options={[
+          ["low", "Low"],
+          ["balanced", "Balanced"],
+          ["best", "Best"],
+          ["custom", "Custom"],
+        ]}
+        onChange={setQuality}
+      />
       {typeof s.quality === "object" && (
-        <>
+        <div class="field">
           <label for="vs-custom">Bitrate %</label>
           <input
             id="vs-custom"
@@ -74,73 +115,80 @@ export function ViewSettings(props: {
               props.onChange({ ...s, quality: { custom: n } });
             }}
           />
-        </>
+        </div>
       )}
-      <label for="vs-fps">Frame rate</label>
-      <select
-        id="vs-fps"
-        value={s.fps === undefined ? "default" : String(s.fps)}
-        onChange={(e) => {
-          const v = e.currentTarget.value;
-          props.onChange({
-            ...s,
-            fps: v === "default" ? undefined : Number(v),
-          });
-        }}
-      >
-        <option value="default">Default (up to 30 fps)</option>
-        {FPS_CHOICES.map((f) => (
-          <option key={f} value={String(f)}>
-            Up to {f} fps
-          </option>
-        ))}
-      </select>
-      <label for="vs-scaling">Scaling</label>
-      <select
-        id="vs-scaling"
+      <div class="field">
+        <label for="vs-fps">Frame rate limit</label>
+        <select
+          id="vs-fps"
+          aria-describedby="vs-fps-hint"
+          value={s.fps === undefined ? "default" : String(s.fps)}
+          onChange={(e) => {
+            const v = e.currentTarget.value;
+            props.onChange({
+              ...s,
+              fps: v === "default" ? undefined : Number(v),
+            });
+          }}
+        >
+          <option value="default">Up to 30 fps (default)</option>
+          {FPS_CHOICES.map((f) => (
+            <option key={f} value={String(f)}>
+              Up to {f} fps
+            </option>
+          ))}
+        </select>
+        <p class="field-hint" id="vs-fps-hint">
+          The remote sends fewer frames when the screen is still.
+        </p>
+      </div>
+      <Segmented<Scaling>
+        label="Scaling"
         value={s.scaling}
-        onChange={(e) =>
-          props.onChange({ ...s, scaling: e.currentTarget.value as Scaling })
-        }
-      >
-        <option value="fit">Fit to window</option>
-        <option value="original">Original size (scroll)</option>
-      </select>
-      <label for="vs-keyboard">Keyboard</label>
-      <select
-        id="vs-keyboard"
+        options={[
+          ["fit", "Fit to window"],
+          ["original", "Original size"],
+        ]}
+        onChange={(scaling) => props.onChange({ ...s, scaling })}
+      />
+      <Segmented<PeerSettings["keyboard"]>
+        label="Keyboard"
         value={s.keyboard}
-        onChange={(e) =>
-          props.onChange({
-            ...s,
-            keyboard: e.currentTarget.value as PeerSettings["keyboard"],
-          })
+        options={[
+          ["map", "By key position"],
+          ["translate", "By character"],
+        ]}
+        onChange={(keyboard) => props.onChange({ ...s, keyboard })}
+        hint="By key position uses the remote's keyboard layout. By character types what your keyboard shows. Shortcuts always go by position."
+      />
+      <h3>This device</h3>
+      <Segmented<PointerMode>
+        label="Touch input"
+        value={props.pointerMode}
+        options={[
+          ["touch", "Direct touch"],
+          ["trackpad", "Trackpad"],
+        ]}
+        onChange={props.onPointerMode}
+        hint={
+          props.pointerMode === "touch"
+            ? "Tap where you want to click."
+            : "Drag to move a cursor, tap to click."
         }
-      >
-        <option value="map">By key position (remote layout)</option>
-        <option value="translate">By character (your layout)</option>
-      </select>
-      <label for="vs-theme">Theme</label>
-      <select
-        id="vs-theme"
+      />
+      <Segmented<Theme>
+        label="Theme"
         value={theme}
-        onChange={(e) => {
-          const t = e.currentTarget.value as Theme;
+        options={[
+          ["auto", "System"],
+          ["light", "Light"],
+          ["dark", "Dark"],
+        ]}
+        onChange={(t) => {
           setTheme(t);
           applyTheme(t);
         }}
-      >
-        <option value="auto">System</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-      </select>
-      <p class="note">
-        Quality, frame rate, scaling and keyboard are remembered for this
-        remote. "By character" types what your keyboard shows even when the
-        remote uses another layout; shortcuts (Ctrl+C) still go by position.
-        Frame rate is an upper limit: the remote sends fewer frames when the
-        screen is still or the link is slow.
-      </p>
+      />
     </form>
   );
 }

@@ -1,6 +1,8 @@
 // Files panel: browse the remote machine's files, download, upload (pickers or drag
 // and drop), new folder, delete; transfers with progress and cancel. Opens its own file-transfer
 // session on first use (a peer only does file actions on one), with the session's credentials.
+// SessionView keeps it mounted once opened and only hides it, so transfers (and the login) outlive
+// the panel being closed; the session ends with the SessionView.
 import { useEffect, useRef, useState } from "preact/hooks";
 import {
   FileType,
@@ -11,6 +13,7 @@ import {
   type TransferJob,
 } from "@rustdesk-web/core";
 import type { AppConfig } from "./config";
+import { ArrowIcon, FilesIcon, RefreshIcon } from "./icons";
 import {
   baseName,
   canPickFolder,
@@ -38,13 +41,20 @@ interface Transfer {
   job?: TransferJob;
 }
 
+export interface TransferSummary {
+  running: number;
+  /** 0 to 100 over everything running; undefined while no size is known. */
+  percent: number | undefined;
+}
+
 let transferKeys = 0;
 
 export function FilesPanel(props: {
   config: AppConfig;
   peerId: string;
   password: string;
-  onClose: () => void;
+  /** Running transfers and their overall progress, for the bar and the disconnect check. */
+  onTransfers: (t: TransferSummary) => void;
 }) {
   const conn = useRef<{ session: Session; files: FileSession }>();
   const [status, setStatus] = useState<"connecting" | "ready" | "error">(
@@ -58,6 +68,9 @@ export function FilesPanel(props: {
   const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [naming, setNaming] = useState<string>();
+  const nameInput = useRef<HTMLInputElement>(null);
+  const newFolderBtn = useRef<HTMLButtonElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const folderInput = useRef<HTMLInputElement>(null);
 
@@ -117,14 +130,20 @@ export function FilesPanel(props: {
     };
   }, []);
 
-  // Leaving the page mid-transfer drops the connection (see above): let the browser ask first.
-  const busy = transfers.some((t) => t.state === "running");
+  // SessionView guards leaving the page while the session is live, and shows what runs.
+  const report = useRef(props.onTransfers);
+  report.current = props.onTransfers;
+  const last = useRef("");
   useEffect(() => {
-    if (!busy) return;
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [busy]);
+    const running = transfers.filter((t) => t.state === "running");
+    const total = running.reduce((n, t) => n + t.total, 0);
+    const bytes = running.reduce((n, t) => n + Math.min(t.bytes, t.total), 0);
+    const percent = total > 0 ? Math.floor((bytes / total) * 100) : undefined;
+    const sig = `${running.length}/${percent}`;
+    if (sig === last.current) return;
+    last.current = sig;
+    report.current({ running: running.length, percent });
+  }, [transfers]);
 
   const transfersRef = useRef<Transfer[]>([]);
   transfersRef.current = transfers;
@@ -217,11 +236,24 @@ export function FilesPanel(props: {
     }
   };
 
-  const mkdir = () => {
-    const name = prompt("New folder name");
+  const mkdir = (name: string) => {
     if (!name || !conn.current) return;
+    if (/[\\/]/.test(name)) {
+      setError("A folder name cannot contain / or \\.");
+      return;
+    }
+    setError("");
     conn.current.files.mkdir(joinPath(path, name));
+    setNaming(undefined);
     setTimeout(() => void list(path), 400);
+  };
+  // The name field takes focus when it opens; the button gets it back when it closes.
+  useEffect(() => {
+    if (naming !== undefined) nameInput.current?.focus();
+  }, [naming === undefined]);
+  const stopNaming = () => {
+    setNaming(undefined);
+    newFolderBtn.current?.focus();
   };
 
   const remove = () => {
@@ -244,11 +276,12 @@ export function FilesPanel(props: {
       return n;
     });
   const chosen = entries.filter((e) => selected.has(e.name));
+  const downloadable =
+    chosen.length === 1 && !(isDir(chosen[0]!) && !canPickFolder());
 
   return (
-    <aside
+    <div
       class={`files${dragging ? " dragging" : ""}`}
-      aria-label="Files"
       onDragOver={(e) => {
         e.preventDefault();
         setDragging(true);
@@ -260,12 +293,6 @@ export function FilesPanel(props: {
         if (e.dataTransfer?.files.length) void upload(e.dataTransfer.files);
       }}
     >
-      <header>
-        <h2>Files on {props.peerId}</h2>
-        <button type="button" onClick={props.onClose} aria-label="Close files">
-          ×
-        </button>
-      </header>
       {status === "connecting" && <p role="status">Opening a file session…</p>}
       {error && (
         <p class="error" role="alert">
@@ -283,11 +310,12 @@ export function FilesPanel(props: {
           >
             <button
               type="button"
-              title="Up"
-              aria-label="Up"
+              class="icon-btn"
+              title="Up one folder"
+              aria-label="Up one folder"
               onClick={() => void list(parentPath(path))}
             >
-              ↑
+              <ArrowIcon dir="up" size={16} />
             </button>
             <input
               aria-label="Remote path"
@@ -296,29 +324,22 @@ export function FilesPanel(props: {
             />
             <button
               type="button"
+              class="icon-btn"
               title="Refresh"
               aria-label="Refresh"
               onClick={() => void list(path)}
             >
-              ⟳
+              <RefreshIcon size={16} />
             </button>
           </form>
           <div class="actions">
             <button
               type="button"
-              disabled={
-                chosen.length !== 1 || (isDir(chosen[0]!) && !canPickFolder())
-              }
-              onClick={() => void download(chosen[0]!)}
-            >
-              Download
-            </button>
-            <button
-              type="button"
+              class="primary"
               disabled={!canWrite}
               onClick={() => fileInput.current?.click()}
             >
-              Upload files
+              Upload
             </button>
             <button
               type="button"
@@ -327,13 +348,31 @@ export function FilesPanel(props: {
             >
               Upload folder
             </button>
-            <button type="button" disabled={!canWrite} onClick={mkdir}>
+            <button
+              ref={newFolderBtn}
+              type="button"
+              disabled={!canWrite}
+              onClick={() => setNaming("")}
+            >
               New folder
             </button>
+            <span class="spacer" />
+            <button
+              type="button"
+              disabled={!downloadable}
+              onClick={() => void download(chosen[0]!)}
+            >
+              {downloadable ? "Download 1 item" : "Download"}
+            </button>
             {confirmDelete ? (
-              <button type="button" class="danger" onClick={remove}>
-                Really delete {chosen.length}?
-              </button>
+              <>
+                <button type="button" class="danger" onClick={remove}>
+                  Really delete {chosen.length}?
+                </button>
+                <button type="button" onClick={() => setConfirmDelete(false)}>
+                  Keep
+                </button>
+              </>
             ) : (
               <button
                 type="button"
@@ -358,52 +397,74 @@ export function FilesPanel(props: {
               onChange={(e) => void upload(e.currentTarget.files ?? [])}
             />
           </div>
-          <table class="listing" aria-label={`Contents of ${path || "/"}`}>
-            <thead>
-              <tr>
-                <th />
-                <th>Name</th>
-                <th>Size</th>
-                <th>Modified</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((e) => (
-                <tr
-                  key={e.name}
-                  class={selected.has(e.name) ? "selected" : undefined}
-                >
-                  <td>
-                    <input
-                      type="checkbox"
-                      aria-label={`Select ${e.name}`}
-                      checked={selected.has(e.name)}
-                      onChange={() => toggle(e.name)}
-                    />
-                  </td>
-                  <td>
-                    {isDir(e) ? (
-                      <button
-                        type="button"
-                        class="dir"
-                        onClick={() => void list(joinPath(path, e.name))}
-                      >
-                        📁 {e.name}
-                      </button>
-                    ) : (
-                      <span onDblClick={() => void download(e)}>{e.name}</span>
-                    )}
-                  </td>
-                  <td>{isDir(e) ? "" : formatBytes(Number(e.size))}</td>
-                  <td>
-                    {e.modifiedTime
-                      ? new Date(Number(e.modifiedTime) * 1000).toLocaleString()
-                      : ""}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {naming !== undefined && (
+            <form
+              class="newfolder"
+              onSubmit={(e) => {
+                e.preventDefault();
+                mkdir(naming.trim());
+              }}
+              onKeyDown={(e) => {
+                if (e.key !== "Escape") return;
+                // Closes this field, not the panel.
+                e.preventDefault();
+                e.stopPropagation();
+                stopNaming();
+              }}
+            >
+              <input
+                ref={nameInput}
+                aria-label="New folder name"
+                placeholder="Folder name"
+                autocomplete="off"
+                value={naming}
+                onInput={(e) => setNaming(e.currentTarget.value)}
+              />
+              <button type="submit" class="primary" disabled={!naming.trim()}>
+                Create
+              </button>
+              <button type="button" onClick={stopNaming}>
+                Cancel
+              </button>
+            </form>
+          )}
+          <ul class="listing" aria-label={`Contents of ${path || "/"}`}>
+            {entries.length === 0 && (
+              <li class="empty">This folder is empty.</li>
+            )}
+            {entries.map((e) => (
+              <li
+                key={e.name}
+                class={selected.has(e.name) ? "selected" : undefined}
+              >
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${e.name}`}
+                    checked={selected.has(e.name)}
+                    onChange={() => toggle(e.name)}
+                  />
+                </label>
+                {isDir(e) ? (
+                  <button
+                    type="button"
+                    class="dir"
+                    onClick={() => void list(joinPath(path, e.name))}
+                  >
+                    <FilesIcon size={16} />
+                    <span>{e.name}</span>
+                  </button>
+                ) : (
+                  <span class="name" onDblClick={() => void download(e)}>
+                    {e.name}
+                  </span>
+                )}
+                <span class="size">
+                  {isDir(e) ? "Folder" : formatBytes(Number(e.size))}
+                </span>
+              </li>
+            ))}
+          </ul>
           <p class="hint">
             {canWrite
               ? `Drop files here to upload them to ${baseName(path) || path}.`
@@ -413,14 +474,23 @@ export function FilesPanel(props: {
       )}
       {transfers.length > 0 && (
         <section class="transfers" aria-label="Transfers">
-          <h3>Transfers</h3>
+          <h3>Transfers keep running while this panel is closed</h3>
           <ul>
             {transfers.map((t) => (
               <li key={t.key} data-state={t.state}>
                 <span class="label">
-                  {t.up ? "↑" : "↓"} {t.label}
+                  <ArrowIcon dir={t.up ? "up" : "down"} size={14} />
+                  <span>
+                    {t.up ? "Uploading" : "Downloading"} {t.label}
+                  </span>
                 </span>
+                {t.state === "running" && (
+                  <button type="button" onClick={() => t.job?.cancel()}>
+                    Cancel
+                  </button>
+                )}
                 <progress
+                  aria-label={t.label}
                   max={t.total || 1}
                   value={t.state === "done" ? t.total || 1 : t.bytes}
                 />
@@ -433,16 +503,11 @@ export function FilesPanel(props: {
                         ? `done${t.message ? `, ${t.message}` : ""}`
                         : "cancelled"}
                 </span>
-                {t.state === "running" && (
-                  <button type="button" onClick={() => t.job?.cancel()}>
-                    Cancel
-                  </button>
-                )}
               </li>
             ))}
           </ul>
         </section>
       )}
-    </aside>
+    </div>
   );
 }
