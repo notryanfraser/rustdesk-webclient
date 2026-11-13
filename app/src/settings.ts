@@ -8,6 +8,8 @@ import type {
 
 export type Scaling = "fit" | "original";
 export type Theme = "auto" | "light" | "dark";
+/** Touch screens: "touch" acts where tapped; "trackpad" moves a cursor relatively (touch.ts). */
+export type PointerMode = "touch" | "trackpad";
 
 export interface PeerSettings {
   /** undefined: the peer's default (Balanced). */
@@ -25,6 +27,8 @@ export const PEER_DEFAULT_FPS = 30;
 
 const PEERS_KEY = "rustdesk-web.peer-settings";
 const THEME_KEY = "rustdesk-web.theme";
+const POINTER_MODE_KEY = "rustdesk-web.pointer-mode";
+const GESTURE_HELP_KEY = "rustdesk-web.gesture-help-seen";
 const DEFAULTS: PeerSettings = { scaling: "fit", keyboard: "map" };
 
 function read<T>(key: string, fallback: T): T {
@@ -88,4 +92,23 @@ export function applyTheme(t: Theme, remember = true): void {
   if (t === "auto") document.documentElement.removeAttribute("data-theme");
   else document.documentElement.dataset.theme = t;
   if (remember) write(THEME_KEY, t);
+}
+
+export function loadPointerMode(): PointerMode {
+  return read<unknown>(POINTER_MODE_KEY, "touch") === "trackpad"
+    ? "trackpad"
+    : "touch";
+}
+
+export function savePointerMode(m: PointerMode): void {
+  write(POINTER_MODE_KEY, m);
+}
+
+/** The touch gesture help card was dismissed once: it is not shown again unasked. */
+export function loadGestureHelpSeen(): boolean {
+  return read<unknown>(GESTURE_HELP_KEY, false) === true;
+}
+
+export function saveGestureHelpSeen(): void {
+  write(GESTURE_HELP_KEY, true);
 }

@@ -85,7 +85,8 @@ export class ClipboardSync {
     this.update({ sent: this.status.sent + 1 });
   }
 
-  private flushPending(): void {
+  /** Apply the pending remote clipboard now; call it from a user gesture. */
+  flushPending(): void {
     const text = this.pendingText;
     if (text === undefined || !navigator.clipboard?.writeText) return;
     this.pendingText = undefined;

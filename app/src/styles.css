@@ -1,13 +1,40 @@
 :root {
-  --bg: #f4f5f7;
+  --bg: #f3f5f8;
   --panel: #ffffff;
-  --text: #1c1e21;
-  --muted: #5f6670;
-  --accent: #2563eb;
+  --text: #171a1f;
+  --muted: #5a6370;
+  --accent: #1d4ed8;
+  --on-accent: #ffffff;
   --danger: #c62828;
-  --border: #d5d9df;
+  --border: #d3d8e0;
+  --field-border: #7d8693;
+  --warn-bg: #fff4d6;
+  --warn-border: #e0b84a;
+  --warn-text: #5c4200;
   --bar: #1f2328;
   --bar-text: #e8eaed;
+  /* Session chrome: dark in both themes. */
+  --chrome-bg: #14161a;
+  --chrome-panel: #1a1d22;
+  --chrome-raised: #23272e;
+  --chrome-field: #1d2026;
+  --chrome-border: #2c313a;
+  --chrome-border-strong: #4a505b;
+  --chrome-text: #e6e9ee;
+  --chrome-muted: #9aa3af;
+  --chrome-accent: #8ab4ff;
+  --chrome-on-accent: #0b1220;
+  --chrome-pressed: #2f3947;
+  --chrome-danger: #ffb4ab;
+  --chrome-danger-border: #b3564c;
+  --chrome-bad: #ff6b5e;
+  --chrome-bad-bg: #3a2422;
+  --chrome-good: #5fd38d;
+  --chrome-good-text: #c9f2d9;
+  --chrome-warn: #f2b84b;
+  --chrome-warn-text: #ffe2a8;
+  --chrome-warn-bg: #2a2412;
+  --chrome-warn-border: #4d4220;
   font-family:
     system-ui,
     -apple-system,
@@ -18,24 +45,34 @@
 /* Theme: follows the system unless the user picked one (settings.ts sets data-theme). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #15171a;
-    --panel: #1e2125;
-    --text: #e8eaed;
-    --muted: #9aa0a6;
-    --accent: #60a5fa;
+    --bg: #14161a;
+    --panel: #1a1d22;
+    --text: #e6e9ee;
+    --muted: #9aa3af;
+    --accent: #8ab4ff;
+    --on-accent: #0b1220;
     --danger: #ef5350;
-    --border: #33383e;
+    --border: #2c313a;
+    --field-border: #6b7380;
+    --warn-bg: #2a2412;
+    --warn-border: #4d4220;
+    --warn-text: #ffe2a8;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #15171a;
-  --panel: #1e2125;
-  --text: #e8eaed;
-  --muted: #9aa0a6;
-  --accent: #60a5fa;
+  --bg: #14161a;
+  --panel: #1a1d22;
+  --text: #e6e9ee;
+  --muted: #9aa3af;
+  --accent: #8ab4ff;
+  --on-accent: #0b1220;
   --danger: #ef5350;
-  --border: #33383e;
+  --border: #2c313a;
+  --field-border: #6b7380;
+  --warn-bg: #2a2412;
+  --warn-border: #4d4220;
+  --warn-text: #ffe2a8;
   color-scheme: dark;
 }
 :root[data-theme="light"] {
@@ -62,102 +99,354 @@ select {
 
 /* Connect screen */
 .connect {
-  max-width: 26rem;
-  margin: 10vh auto 2rem;
+  max-width: 60rem;
+  margin: 6vh auto 2rem;
   padding: env(safe-area-inset-top) calc(1rem + env(safe-area-inset-right))
     env(safe-area-inset-bottom) calc(1rem + env(safe-area-inset-left));
 }
+.connect-head {
+  margin-bottom: 1.5rem;
+}
 .connect h1 {
-  font-size: 1.5rem;
-  margin: 0 0 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.3rem;
 }
-.connect form {
-  display: grid;
-  gap: 0.9rem;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 0.6rem;
-  padding: 1.2rem;
-}
-.connect label {
-  display: grid;
-  gap: 0.3rem;
-  font-size: 0.9rem;
+.connect-head p {
+  margin: 0;
   color: var(--muted);
 }
-.connect input {
-  padding: 0.55rem 0.7rem;
+.connect h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+.connect button,
+.connect input,
+.connect summary {
+  /* Keyboard focus must be visible on every control. */
+  outline-offset: 2px;
+}
+.connect :focus-visible {
+  outline: 2px solid var(--accent);
+}
+/* One column, saved remotes first when there are any; two columns from 900px. */
+.connect-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.saved.has-items {
+  order: -1;
+}
+@media (min-width: 900px) {
+  .connect-grid {
+    display: grid;
+    grid-template-columns: 24rem minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+  .saved.has-items {
+    order: 0;
+  }
+}
+.connect-form,
+.saved {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-width: 0;
+}
+.connect-form {
+  gap: 1rem;
+  background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 0.4rem;
-  background: var(--bg);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
   color: var(--text);
 }
-.connect button[type="submit"] {
-  padding: 0.6rem;
-  border: 0;
-  border-radius: 0.4rem;
-  background: var(--accent);
-  color: #fff;
+.connect input:not([type="checkbox"]) {
+  min-width: 0;
+  height: 2.75rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--field-border);
+  border-radius: 0.5rem;
+  background: var(--panel);
+  color: var(--text);
+}
+.connect .id-input {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 1.125rem;
+  letter-spacing: 0.04em;
+}
+.pw-row {
+  display: flex;
+  gap: 0.4rem;
+}
+.pw-row input {
+  flex: 1;
+}
+.connect button {
+  height: 2.75rem;
+  padding: 0 0.8rem;
+  border: 1px solid var(--field-border);
+  border-radius: 0.5rem;
+  background: var(--panel);
+  color: var(--text);
   cursor: pointer;
 }
-.connect button[type="submit"]:disabled {
+.connect button.primary {
+  border: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+.connect button.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+  font-weight: 600;
+}
+.connect button:disabled {
   opacity: 0.5;
   cursor: default;
 }
+.hint {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  margin: 0;
+}
+.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
 .error,
-.notice {
-  margin-top: 1rem;
+.notice,
+.lost {
+  margin: 0 0 1.5rem;
   padding: 0.7rem 0.9rem;
-  border-radius: 0.4rem;
+  border-radius: 0.5rem;
 }
 .error {
   border: 1px solid var(--danger);
   color: var(--danger);
 }
-.error p {
+.error p,
+.lost p {
   margin: 0 0 0.4rem;
 }
-.error code {
+.error code,
+.lost code {
   font-size: 0.8rem;
-  color: var(--muted);
   word-break: break-word;
+}
+.error code {
+  color: var(--muted);
 }
 .notice {
   color: var(--muted);
 }
-.recent h2 {
-  font-size: 0.9rem;
-  color: var(--muted);
-  margin: 1.5rem 0 0.5rem;
+.lost {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  color: var(--warn-text);
 }
-.recent ul {
+.lost p {
+  margin: 0;
+}
+.lost-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.lost-actions .primary {
+  flex: 1;
+}
+.lost button:not(.primary) {
+  background: transparent;
+  color: inherit;
+  border-color: var(--warn-border);
+}
+.lost button.primary {
+  background: var(--warn-text);
+  color: var(--warn-bg);
+}
+.lost :focus-visible {
+  outline-color: var(--warn-text);
+}
+
+.saved h2 {
+  color: var(--text);
+}
+.peers {
   list-style: none;
   margin: 0;
   padding: 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
 }
-.recent li {
+.peers li {
   display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.4rem 0.5rem 1rem;
   border-bottom: 1px solid var(--border);
 }
-.recent button {
-  background: none;
-  border: 0;
-  color: var(--text);
-  cursor: pointer;
-  padding: 0.5rem 0.3rem;
+.peers li:last-child {
+  border-bottom: 0;
 }
-.recent .peer {
+.peer-info {
   flex: 1;
-  text-align: left;
-  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
-.recent .forget {
+.peer-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.peer-meta {
   color: var(--muted);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.connect .peers .link {
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: inherit;
+  text-decoration: underline;
+}
+.connect .peers input.rename {
+  height: 2.25rem;
+  width: 100%;
+}
+.connect .peer-connect {
+  height: 2.25rem;
+  flex: none;
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+.peer-menu-wrap {
+  position: relative;
+  flex: none;
+}
+.connect .peer-more {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+}
+.peer-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 2;
+  min-width: 8rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.25);
+}
+.connect .peer-menu button {
+  height: 2.25rem;
+  border: 0;
+  text-align: left;
+}
+.connect .peer-menu button:hover {
+  background: var(--bg);
+}
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  font-size: 0.875rem;
+}
+.remember input {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--accent);
+}
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--panel);
+}
+.confirm p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+.connect summary {
+  cursor: pointer;
+}
+
+/* Touch screens: every target at least 44px high. */
+@media (pointer: coarse) {
+  .connect button,
+  .connect input:not([type="checkbox"]),
+  .connect .peer-menu button {
+    min-height: 2.75rem;
+  }
+  .connect .peer-more {
+    min-width: 2.75rem;
+  }
+  .connect .peers .link {
+    min-height: 2.75rem;
+  }
+  .connect .peers input.rename {
+    height: 2.75rem;
+  }
+  .connect summary {
+    padding: 0.7rem 0;
+  }
+  .remember {
+    min-height: 2.75rem;
+  }
+  .remember input {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+/* 320px: the row's buttons stay, the text wraps. */
+@media (max-width: 380px) {
+  .connect-form {
+    padding: 1rem;
+  }
+  .lost-actions {
+    flex-wrap: wrap;
+  }
 }
 
 /* Session */
 /* The session fills the visible viewport (main.tsx tracks visualViewport: phone browser bars and
-   the on-screen keyboard excluded); 100dvh where that is not available. */
+   the on-screen keyboard excluded); 100dvh where that is not available. The chrome is dark in
+   both themes, drawn from the --chrome-* tokens. One DOM serves every layout (SessionView.tsx):
+   .layout-full (bar on top), .layout-narrow (strip on top, Menu at the bottom) and .layout-rail
+   (short landscape: controls in a rail at the right edge). */
 .session {
   position: fixed;
   left: 0;
@@ -167,89 +456,351 @@ select {
   display: flex;
   flex-direction: column;
   background: #000;
+  color: var(--chrome-text);
+  font-size: 0.85rem;
+  /* no pull-to-refresh or edge bounce while a session is live */
+  overscroll-behavior: none;
 }
-/* Under the status bar / notch with viewport-fit=cover: pad by the safe area. */
-.toolbar {
-  position: relative;
-  display: flex;
+:root:has(.session) {
+  overscroll-behavior: none;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.session :focus-visible {
+  outline: 2px solid var(--chrome-accent);
+  outline-offset: 2px;
+}
+
+/* Buttons of the chrome: quiet by default, a pressed state with a border (visible in forced
+   colours too), a filled primary and an outlined danger one. */
+.bar button,
+.popover button,
+.bottom-row button,
+.rail button,
+.banner button,
+.sheet button,
+.dialog button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0 0.65rem;
+  background: transparent;
+  color: var(--chrome-text);
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+.session button[aria-pressed="true"],
+.session button.on {
+  background: var(--chrome-pressed);
+  border-color: var(--chrome-border-strong);
+}
+.session button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.session button.primary {
+  background: var(--chrome-accent);
+  border-color: var(--chrome-accent);
+  color: var(--chrome-on-accent);
+  font-weight: 600;
+}
+.session button.danger {
+  border-color: var(--chrome-danger-border);
+  color: var(--chrome-danger);
+}
+.session .icon-btn {
+  width: 2rem;
+  padding: 0;
+}
+.session select {
+  height: 2rem;
+  max-width: 13rem;
+  min-width: 0;
+  padding: 0 0.5rem;
+  background: var(--chrome-field);
+  color: var(--chrome-text);
+  border: 1px solid var(--chrome-border);
+  border-radius: 0.4rem;
+}
+
+/* Chips: connection quality (bars filled 3/2/1 and a word, so colour is not the only signal)
+   and recording. */
+.chip {
+  display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: calc(0.3rem + env(safe-area-inset-top))
-    calc(0.5rem + env(safe-area-inset-right)) 0.3rem
-    calc(0.5rem + env(safe-area-inset-left));
-  background: var(--bar);
-  color: var(--bar-text);
-  font-size: 0.85rem;
-  min-width: 0;
+  height: 1.75rem;
+  padding: 0 0.65rem;
+  border: 1px solid var(--chrome-border);
+  border-radius: 0.9rem;
+  white-space: nowrap;
+  flex: none;
 }
-.toolbar .peer {
+.chip-good {
+  color: var(--chrome-good-text);
+}
+.chip-good svg {
+  color: var(--chrome-good);
+}
+.chip-fair {
+  color: var(--chrome-warn-text);
+}
+.chip-fair svg {
+  color: var(--chrome-warn);
+}
+.chip-poor {
+  color: var(--chrome-danger);
+}
+.chip-poor svg {
+  color: var(--chrome-bad);
+}
+.chip-wait {
+  color: var(--chrome-muted);
+}
+.rec {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: none;
+  color: var(--chrome-danger);
   font-weight: 600;
-  margin-right: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+.rec svg {
+  color: var(--chrome-bad);
+}
+.badge {
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.3rem;
+  border-radius: 0.55rem;
+  background: var(--chrome-accent);
+  color: var(--chrome-on-accent);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.1rem;
+  text-align: center;
+}
+
+/* Session bar (wide layouts) */
+.bar {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  min-height: 3rem;
+  padding: env(safe-area-inset-top) calc(0.75rem + env(safe-area-inset-right)) 0
+    calc(0.75rem + env(safe-area-inset-left));
+  background: var(--chrome-bg);
+  border-bottom: 1px solid var(--chrome-border);
+}
+.bar .peer,
+.strip .peer {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
-.toolbar > button,
-.toolbar > select {
-  flex: none;
-}
-/* The "⋯" menu (narrow screens) */
-.toolbar .menu {
-  position: absolute;
-  top: 100%;
-  right: calc(0.5rem + env(safe-area-inset-right));
-  z-index: 5;
-  display: grid;
-  gap: 0.3rem;
-  min-width: 12rem;
-  padding: 0.4rem;
-  background: var(--bar);
-  border: 1px solid #444c56;
-  border-radius: 0 0 0.4rem 0.4rem;
-  box-shadow: 0 6px 16px rgb(0 0 0 / 0.4);
-}
-.toolbar .menu button,
-.toolbar .menu select {
-  text-align: left;
-  width: 100%;
-}
-.toolbar .spacer {
+.spacer {
   flex: 1;
 }
-.toolbar button,
-.toolbar select {
-  background: #2d333b;
-  color: var(--bar-text);
-  border: 1px solid #444c56;
-  border-radius: 0.3rem;
-  padding: 0.25rem 0.6rem;
-  cursor: pointer;
+.bar .group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: none;
 }
-.toolbar button[aria-pressed="true"] {
-  background: #3b4a63;
+.bar .group + .group {
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--chrome-border);
 }
-.toolbar button:disabled {
-  opacity: 0.5;
-  cursor: default;
+.bar > button {
+  flex: none;
 }
-.toolbar .danger {
-  border-color: var(--danger);
+.more-wrap {
+  position: relative;
 }
-/* Touch screens: controls big enough for a finger. */
-@media (pointer: coarse) {
-  .toolbar {
-    font-size: 0.95rem;
+.popover {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 6;
+  display: grid;
+  gap: 0.2rem;
+  min-width: 12rem;
+  padding: 0.35rem;
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-border-strong);
+  border-radius: 0.5rem;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.4);
+}
+.popover button {
+  justify-content: flex-start;
+  width: 100%;
+}
+/* Narrower bars: icons alone (the names stay for screen readers). */
+@media (max-width: 899px) {
+  .bar .group > button .lbl {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
-  .toolbar button,
-  .toolbar select {
-    min-height: 2.5rem;
-    min-width: 2.5rem;
-  }
 }
-/* No key bar: keep the remote screen above the home indicator. */
-.session:not(:has(.keybar)) .screen {
-  margin-bottom: env(safe-area-inset-bottom);
+
+/* Narrow layouts: status strip on top, Keys and Menu above the key bar */
+.strip {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  padding: calc(0.5rem + env(safe-area-inset-top))
+    calc(1rem + env(safe-area-inset-right)) 0.5rem
+    calc(1rem + env(safe-area-inset-left));
+  background: var(--chrome-bg);
+  border-bottom: 1px solid var(--chrome-border);
+  font-size: 0.9rem;
+}
+.bottom-row {
+  flex: none;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem calc(0.75rem + env(safe-area-inset-right)) 0.5rem
+    calc(0.75rem + env(safe-area-inset-left));
+  background: var(--chrome-bg);
+  border-top: 1px solid var(--chrome-border);
+}
+.bottom-row button {
+  flex: 1;
+  min-height: 2.75rem;
+  background: var(--chrome-raised);
+  border-color: var(--chrome-border);
+  font-size: 0.95rem;
+}
+.session button.menu-btn {
+  background: var(--chrome-accent);
+  border-color: var(--chrome-accent);
+  color: var(--chrome-on-accent);
+  font-weight: 600;
+}
+
+/* Short landscape: the rail sits beside the screen, inside the safe area */
+.rail {
+  flex: none;
+  width: calc(3.75rem + env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: calc(0.6rem + env(safe-area-inset-top)) env(safe-area-inset-right)
+    calc(0.6rem + env(safe-area-inset-bottom)) 0;
+  background: var(--chrome-bg);
+  border-left: 1px solid var(--chrome-border);
+  font-size: 0.75rem;
+}
+.rail button {
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 3.5rem;
+  min-height: 3.5rem;
+  padding: 0;
+  background: var(--chrome-raised);
+  border-color: var(--chrome-border);
+  border-radius: 0.6rem;
+}
+.rail .chip {
+  flex-direction: column;
+  gap: 0.15rem;
+  height: auto;
+  padding: 0;
+  border: 0;
+}
+.rail .rec {
+  gap: 0.25rem;
+  font-size: 0.7rem;
+}
+.layout-rail .main {
+  padding-left: env(safe-area-inset-left);
+}
+
+/* Status banners: persistent until acted on or dismissed */
+.banners {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem calc(0.75rem + env(safe-area-inset-right)) 0.4rem
+    calc(0.75rem + env(safe-area-inset-left));
+  border-bottom: 1px solid var(--chrome-border);
+  background: var(--chrome-raised);
+  color: var(--chrome-text);
+}
+.banner > span {
+  flex: 1;
+  min-width: 0;
+}
+.banner.warn {
+  background: var(--chrome-warn-bg);
+  border-color: var(--chrome-warn-border);
+  color: var(--chrome-warn-text);
+}
+.banner.warn button {
+  color: var(--chrome-warn-text);
+}
+.banner.warn button.primary {
+  background: var(--chrome-warn);
+  border-color: var(--chrome-warn);
+  color: #1f1700;
+}
+.banner.bad {
+  background: var(--chrome-bad-bg);
+  border-color: var(--chrome-danger-border);
+  color: var(--chrome-danger);
+}
+.banner.bad button {
+  color: var(--chrome-danger);
+}
+
+/* Screen, with the side panel and the key bar around it */
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* No key bar: keep the controls above the home indicator. */
+.session:not(:has(.keybar)) .main {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 .screen {
   position: relative;
@@ -262,8 +813,15 @@ select {
   height: 100%;
   object-fit: contain;
   display: block;
-  outline: none;
   cursor: default;
+}
+/* Keyboard focus means "your keys go to the remote": show it. */
+.screen canvas:focus {
+  outline: none;
+}
+.screen canvas:focus-visible {
+  outline: 2px solid var(--chrome-accent);
+  outline-offset: -2px;
 }
 .overlay {
   position: absolute;
@@ -292,184 +850,587 @@ select {
     animation: none;
   }
 }
-.stats {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
+.hint {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.3rem calc(0.75rem + env(safe-area-inset-right)) 0.3rem
+    calc(0.75rem + env(safe-area-inset-left));
+  background: var(--chrome-bg);
+  border-top: 1px solid var(--chrome-border);
+  color: var(--chrome-muted);
+  font-size: 0.75rem;
+}
+.hint kbd {
+  padding: 0 0.3rem;
+  border: 1px solid var(--chrome-border-strong);
+  border-radius: 0.25rem;
+  color: var(--chrome-text);
+  font: inherit;
+}
+.hint .summary {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+/* The hint is for keyboards. */
+@media (pointer: coarse) {
+  .hint {
+    display: none;
+  }
+}
+
+/* Side panel (Chat, Files, Settings, Stats; one at a time, behind one header with tabs). Docked
+   beside the screen where there is room; over it below that, and over everything on phones. The
+   Files panel stays mounted while hidden (SessionView), so [hidden] must win over display. */
+.dock {
+  flex: none;
+  width: 24rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--chrome-panel);
+  color: var(--chrome-text);
+  border-left: 1px solid var(--chrome-border);
+  font-size: 0.9rem;
+}
+.dock[hidden],
+.dock-panel[hidden] {
+  display: none;
+}
+.dock-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  border-bottom: 1px solid var(--chrome-border);
+}
+.dock-head h2 {
+  flex: 1;
   margin: 0;
-  padding: 0.4rem 0.6rem;
+  padding-left: 0.4rem;
+  font-size: 1rem;
+}
+.dock-head .tabs {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  min-width: 0;
+}
+.dock button,
+.dock input:not([type="checkbox"]):not([type="radio"]),
+.dock select {
+  font: inherit;
+}
+.dock button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  background: var(--chrome-raised);
+  color: var(--chrome-text);
+  border: 1px solid var(--chrome-border);
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+.dock .icon-btn {
+  width: 2rem;
+  padding: 0;
+}
+.dock-head .icon-btn {
+  flex: none;
+  background: transparent;
+  border-color: transparent;
+}
+.dock-head .tabs button {
+  background: transparent;
+  border-color: transparent;
+}
+/* Selected: a fill and a border (so it shows in forced colours too), not colour alone. */
+.dock-head .tabs button[aria-selected="true"] {
+  background: var(--chrome-pressed);
+  border-color: var(--chrome-border-strong);
+  font-weight: 600;
+}
+.dock input:not([type="checkbox"]):not([type="radio"]),
+.dock select,
+.dock textarea {
+  min-width: 0;
+  padding: 0.35rem 0.5rem;
+  background: var(--chrome-field);
+  color: var(--chrome-text);
+  border: 1px solid var(--chrome-border-strong);
+  border-radius: 0.4rem;
+}
+.dock-panel {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+.dock-panel:focus {
+  outline: none;
+}
+.stats {
+  margin: 0;
+  padding: 0.9rem;
   display: grid;
-  grid-template-columns: auto auto;
-  gap: 0.1rem 0.6rem;
-  font:
-    12px/1.4 ui-monospace,
-    monospace;
-  color: #8f8;
-  background: rgb(0 0 0 / 0.7);
-  border-radius: 0.3rem;
-  pointer-events: none;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.65rem 1rem;
+  font-variant-numeric: tabular-nums;
+}
+.stats dt {
+  color: var(--chrome-muted);
 }
 .stats dd {
   margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1099px) {
+  .layout-full .dock {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    width: min(26rem, 100%);
+    box-shadow: -4px 0 16px rgb(0 0 0 / 0.3);
+  }
+}
+.layout-rail .dock {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: calc(3.75rem + env(safe-area-inset-right));
+  z-index: 4;
+  width: min(24rem, calc(100% - 3.75rem));
+  box-shadow: -4px 0 16px rgb(0 0 0 / 0.3);
+}
+.layout-narrow .dock {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  width: auto;
+  border-left: 0;
+}
+
+/* Menu sheet and disconnect confirmation: the only things that cover the screen */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  background: rgb(0 0 0 / 0.55);
+}
+.sheet-scrim {
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.sheet,
+.dialog {
+  background: var(--chrome-panel);
+  color: var(--chrome-text);
+  border: 1px solid var(--chrome-border);
+}
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-height: 100%;
+  overflow: auto;
+  padding: 0.5rem calc(0.75rem + env(safe-area-inset-right))
+    calc(1rem + env(safe-area-inset-bottom))
+    calc(0.75rem + env(safe-area-inset-left));
+  border-width: 1px 0 0;
+  border-radius: 1rem 1rem 0 0;
+}
+.layout-rail .sheet {
+  align-self: center;
+  width: min(36rem, 100%);
+  border-width: 1px;
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 0.4rem;
+}
+.sheet-head h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+.sheet-head p {
+  margin: 0.15rem 0 0;
+  color: var(--chrome-muted);
+  font-size: 0.8rem;
+}
+.sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.layout-rail .sheet-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.sheet-grid button {
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 4.75rem;
+  padding: 0.4rem;
+  background: var(--chrome-raised);
+  border-color: var(--chrome-border);
+  border-radius: 0.75rem;
+  text-align: center;
+}
+.sheet-grid .note {
+  color: var(--chrome-muted);
+}
+.sheet .sheet-disconnect {
+  width: 100%;
+  min-height: 3rem;
+  margin-top: 0.4rem;
+  font-weight: 600;
+  border-radius: 0.65rem;
+}
+.dialog-scrim {
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.dialog {
+  width: min(24rem, 100%);
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0 0.4rem;
+}
+.confirm p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.confirm button {
+  min-height: 3rem;
+  font-weight: 600;
+  border-radius: 0.65rem;
+}
+
+/* Touch screens: every target at least 44px. */
+@media (pointer: coarse) {
+  .bar button,
+  .popover button,
+  .banner button,
+  .session .icon-btn,
+  .dock-head .icon-btn,
+  .session select {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+  .session .bar select {
+    height: 2.75rem;
+  }
+  .bar,
+  .banners .banner {
+    font-size: 0.95rem;
+  }
+}
+@media (forced-colors: active) {
+  .session button[aria-pressed="true"],
+  .session button.on {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  .session button.primary,
+  .session button.menu-btn {
+    border-color: ButtonText;
+  }
 }
 
 /* Files panel */
 .files {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(30rem, 100%);
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.6rem;
-  overflow: auto;
-  background: var(--panel);
-  color: var(--text);
-  border-left: 1px solid var(--border);
-  font-size: 0.85rem;
-  box-shadow: -4px 0 16px rgb(0 0 0 / 0.3);
+  gap: 0.6rem;
+  padding: 0.75rem;
 }
 .files.dragging {
-  outline: 3px dashed var(--accent);
+  outline: 3px dashed var(--chrome-accent);
   outline-offset: -6px;
 }
-.files header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.files h2 {
-  font-size: 1rem;
+.files p {
   margin: 0;
 }
-.files h3 {
-  font-size: 0.85rem;
-  margin: 0.4rem 0;
-  color: var(--muted);
+.files .error {
+  color: var(--chrome-danger);
 }
-.files button {
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 0.3rem;
-  padding: 0.25rem 0.55rem;
-  cursor: pointer;
+.files .hint {
+  color: var(--chrome-muted);
+  font-size: 0.8rem;
 }
-.files button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-.files button.danger {
-  border-color: var(--danger);
-  color: var(--danger);
-}
-.files .pathbar {
+.files .pathbar,
+.files .newfolder {
   display: flex;
   gap: 0.3rem;
 }
-.files .pathbar input {
+.files .pathbar input,
+.files .newfolder input {
   flex: 1;
   min-width: 0;
-  padding: 0.25rem 0.4rem;
-  border: 1px solid var(--border);
-  border-radius: 0.3rem;
-  background: var(--bg);
-  color: var(--text);
+}
+.files .pathbar input {
   font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
 }
 .files .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: 0.35rem;
+}
+.files .spacer {
+  flex: 1;
 }
 .files .listing {
-  width: 100%;
-  border-collapse: collapse;
+  flex: 1 1 auto;
+  min-height: 6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: auto;
+  border: 1px solid var(--chrome-border);
+  border-radius: 0.5rem;
 }
-.files .listing th {
-  text-align: left;
-  color: var(--muted);
-  font-weight: normal;
+.files .listing li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0.15rem 0.6rem 0.15rem 0.2rem;
+  border-bottom: 1px solid var(--chrome-raised);
 }
-.files .listing td,
-.files .listing th {
-  padding: 0.2rem 0.3rem;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
+.files .listing li:last-child {
+  border-bottom: 0;
 }
-.files .listing td:nth-child(2) {
-  white-space: normal;
-  word-break: break-all;
+/* A selected row has a fill and its checkbox: not colour alone. */
+.files .listing li.selected {
+  background: color-mix(in srgb, var(--chrome-accent) 16%, transparent);
 }
-.files .listing tr.selected {
-  background: color-mix(in srgb, var(--accent) 15%, transparent);
+.files .listing li.empty {
+  padding: 0.6rem;
+  color: var(--chrome-muted);
+}
+.files .check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+.files .check input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+}
+.files .listing .name,
+.files .listing .dir {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .files .listing button.dir {
-  border: 0;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  min-height: 0;
+  padding: 0.2rem 0;
   background: none;
-  padding: 0;
+  border: 0;
+  color: inherit;
   text-align: left;
 }
-.files .hint {
-  color: var(--muted);
-  margin: 0;
+.files .listing button.dir svg {
+  flex: none;
+  color: var(--chrome-accent);
+}
+.files .size {
+  flex: none;
+  color: var(--chrome-muted);
+  font-variant-numeric: tabular-nums;
+}
+.files .transfers h3 {
+  margin: 0.2rem 0 0.5rem;
+  color: var(--chrome-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 .files .transfers ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.4rem;
+  gap: 0.7rem;
 }
 .files .transfers li {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.15rem 0.5rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 0.6rem;
+  align-items: center;
+}
+.files .transfers .label {
+  display: flex;
+  gap: 0.35rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.files .transfers .label svg {
+  flex: none;
+  margin-top: 0.15rem;
 }
 .files .transfers progress {
+  grid-column: 1 / -1;
   width: 100%;
+  height: 0.5rem;
+  accent-color: var(--chrome-accent);
 }
 .files .transfers .detail {
-  color: var(--muted);
-  grid-column: 1;
+  grid-column: 1 / -1;
+  color: var(--chrome-muted);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 .files .transfers li[data-state="failed"] .detail {
-  color: var(--danger);
+  color: var(--chrome-danger);
 }
 
-/* View settings panel */
+/* Settings panel: sections of fields, segmented controls made of native radios */
 .view-settings {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.4rem 0.6rem;
-  align-items: center;
-  padding: 0.7rem;
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 0 0 0 0.4rem;
-  font-size: 0.85rem;
-  box-shadow: -4px 4px 16px rgb(0 0 0 / 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+.view-settings h3 {
+  margin: 0;
+  color: var(--chrome-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.view-settings h3:not(:first-child) {
+  margin-top: 0.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--chrome-border);
+}
+.view-settings .field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.view-settings legend {
+  padding: 0;
+  margin-bottom: 0.4rem;
+}
+.view-settings .field-hint {
+  margin: 0;
+  color: var(--chrome-muted);
+  font-size: 0.8rem;
 }
 .view-settings select,
-.view-settings input {
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 0.3rem;
-  padding: 0.2rem 0.3rem;
+.view-settings input[type="number"] {
+  min-height: 2.25rem;
+  max-width: 100%;
 }
-.view-settings .note {
-  grid-column: 1 / -1;
-  color: var(--muted);
+/* The choices wrap onto more lines before they overflow (narrow panels, 200% zoom). */
+.seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 0.6rem;
+}
+.seg label {
+  position: relative;
+  flex: 1 1 5rem;
+  display: grid;
+}
+.seg input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
   margin: 0;
-  max-width: 18rem;
+  cursor: pointer;
+}
+.seg span {
+  display: grid;
+  place-items: center;
+  min-height: 2.25rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.45rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.seg input:checked + span {
+  background: var(--chrome-pressed);
+  border-color: var(--chrome-border-strong);
+  font-weight: 600;
+}
+.seg input:focus-visible + span {
+  outline: 2px solid var(--chrome-accent);
+  outline-offset: 1px;
+}
+@media (forced-colors: active) {
+  .seg input:checked + span,
+  .dock-head .tabs button[aria-selected="true"],
+  .files .listing li.selected {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+/* Touch screens: every target at least 44px. */
+@media (pointer: coarse) {
+  .dock button,
+  .dock input:not([type="checkbox"]):not([type="radio"]),
+  .dock select,
+  .view-settings select,
+  .view-settings input[type="number"] {
+    min-height: 2.75rem;
+  }
+  .dock .icon-btn {
+    min-width: 2.75rem;
+  }
+  .seg span {
+    min-height: 2.75rem;
+  }
+  .files .listing li {
+    min-height: 2.75rem;
+  }
+  .files .check {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .files .check input {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+  .files .listing button.dir {
+    min-height: 2.75rem;
+  }
 }
 /* Scaling "original": one remote pixel per CSS pixel, scrolling when larger than the window. */
 .screen.original {
@@ -480,34 +1441,143 @@ select {
   max-height: none;
 }
 
-/* Key bar for touch devices */
+/* Key deck for touch devices: chrome tokens, touch-sized keys. One row where there is room; on
+   phones in portrait two rows of equal-width keys, then Type, the second page and pointer mode. */
 .keybar {
-  display: flex;
-  gap: 0.3rem;
-  padding: 0.35rem calc(0.35rem + env(safe-area-inset-right))
-    calc(0.35rem + env(safe-area-inset-bottom))
-    calc(0.35rem + env(safe-area-inset-left));
   flex: none;
-  overflow-x: auto;
-  background: var(--bar);
-  color: var(--bar-text);
   position: relative;
+  padding: 0.5rem calc(0.5rem + env(safe-area-inset-right))
+    calc(0.5rem + env(safe-area-inset-bottom))
+    calc(0.5rem + env(safe-area-inset-left));
+  background: var(--chrome-bg);
+  border-top: 1px solid var(--chrome-border);
+  color: var(--chrome-text);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.keybar.narrow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.keybar .row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  overflow-x: auto;
+}
+.keybar .row .spacer {
+  flex: 1;
+  min-width: 0.5rem;
+}
+.keybar .sep {
+  flex: none;
+  width: 1px;
+  height: 1.75rem;
+  margin: 0 0.25rem;
+  background: var(--chrome-border);
+}
+.keybar .grid {
+  display: grid;
+  gap: 0.35rem;
+}
+.keybar .grid.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.keybar .grid.six {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.keybar .grid.combos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.keybar .grid.foot {
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
 }
 .keybar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   flex: none;
-  min-width: 2.6rem;
-  min-height: 2.4rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   padding: 0 0.6rem;
-  border: 1px solid #444b53;
-  border-radius: 0.35rem;
-  background: #2b3036;
-  color: var(--bar-text);
+  background: var(--chrome-raised);
+  color: var(--chrome-text);
+  border: 1px solid var(--chrome-border);
+  border-radius: 0.5rem;
+  font: inherit;
   font-size: 0.95rem;
+  touch-action: manipulation;
+  cursor: pointer;
 }
-.keybar button[aria-pressed="true"] {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+.keybar .row button {
+  min-width: 3.25rem;
+}
+.keybar .grid button {
+  min-width: 0;
+  padding: 0 0.25rem;
+}
+.keybar .grid.foot button {
+  min-height: 3rem;
+}
+.keybar button[aria-pressed="true"],
+.keybar button[aria-expanded="true"] {
+  background: var(--chrome-pressed);
+  border-color: var(--chrome-border-strong);
+}
+/* Modifiers: off, latched (the next key) and locked (until tapped again). Dark text on the
+   accent; locked adds a lock icon and a inner ring, so the three differ without
+   colour. */
+.keybar button.mod[data-state="latched"],
+.keybar button.mod[data-state="locked"] {
+  background: var(--chrome-accent);
+  border-color: var(--chrome-accent);
+  color: var(--chrome-on-accent);
+  font-weight: 600;
+}
+.keybar button.mod[data-state="locked"] {
+  box-shadow:
+    inset 0 0 0 2px var(--chrome-accent),
+    inset 0 0 0 4px var(--chrome-on-accent);
+}
+.keybar .held {
+  margin: 0 0 0.35rem;
+  color: var(--chrome-muted);
+  font-size: 0.85rem;
+}
+.keybar .page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.keys-popover {
+  position: absolute;
+  right: calc(0.5rem + env(safe-area-inset-right));
+  bottom: calc(100% + 0.35rem);
+  z-index: 6;
+  width: min(26rem, calc(100% - 1rem));
+  padding: 0.5rem;
+  background: var(--chrome-panel);
+  border: 1px solid var(--chrome-border-strong);
+  border-radius: 0.6rem;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.5);
+}
+.keybar :focus-visible {
+  outline: 2px solid var(--chrome-accent);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  .keybar button.mod[data-state="latched"],
+  .keybar button.mod[data-state="locked"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  .keybar button.mod[data-state="locked"] {
+    outline-width: 4px;
+  }
 }
 /* Focusable (so the soft keyboard opens) but invisible; iOS will not focus display:none. */
 .keybar .soft-keyboard {
@@ -526,66 +1596,78 @@ select {
   touch-action: none;
 }
 
-/* Phones: panels take the full width. */
-@media (max-width: 759px) {
-  .view-settings {
-    left: 0;
-    right: 0;
-    border-radius: 0;
-    max-height: 100%;
-    overflow: auto;
+/* Gesture help: a card in the free space on phones in portrait, a banner elsewhere */
+.gesture-card {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0.5rem 0.75rem;
+  padding: 0.75rem;
+  background: var(--chrome-panel);
+  border: 1px solid var(--chrome-border);
+  border-radius: 0.75rem;
+}
+.gesture-card .gestures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 0.75rem;
+}
+.gesture-card button {
+  align-self: flex-start;
+  min-height: 2.75rem;
+  padding: 0 0.9rem;
+  background: transparent;
+  color: var(--chrome-text);
+  border: 1px solid var(--chrome-border-strong);
+  border-radius: 0.5rem;
+}
+.gestures {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.gestures strong {
+  font-weight: 600;
+}
+.banner .gestures {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.75rem;
+}
+.banner .gestures li + li::before {
+  content: "\00b7";
+  margin-right: 0.75rem;
+  color: var(--chrome-muted);
+}
+.bar .status,
+.bar .status-short {
+  color: var(--chrome-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+.bar .status-short {
+  display: none;
+}
+@media (max-width: 1099px) {
+  .bar .status {
+    display: none;
   }
-  .files {
-    width: 100%;
+  .bar .status-short {
+    display: inline;
   }
 }
 
 /* Chat */
-.toolbar .badge {
-  display: inline-block;
-  min-width: 1.2em;
-  margin-left: 0.35rem;
-  padding: 0 0.3em;
-  border-radius: 0.6em;
-  background: var(--danger);
-  color: #fff;
-  font-size: 0.75em;
-  line-height: 1.2em;
-  text-align: center;
-}
 .chat {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 3;
-  width: min(24rem, 100%);
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.6rem;
-  background: var(--panel);
-  color: var(--text);
-  border-left: 1px solid var(--border);
-  font-size: 0.9rem;
-  box-shadow: -4px 0 16px rgb(0 0 0 / 0.3);
-}
-.chat header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.chat h2 {
-  font-size: 1rem;
-  margin: 0;
-}
-.chat button {
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 0.3rem;
-  padding: 0.3rem 0.6rem;
-  cursor: pointer;
+  gap: 0.6rem;
+  padding: 0.75rem;
 }
 .chat button:disabled {
   opacity: 0.5;
@@ -604,18 +1686,18 @@ select {
 }
 .chat .messages li {
   max-width: 85%;
-  padding: 0.35rem 0.55rem;
+  padding: 0.4rem 0.6rem;
   border-radius: 0.5rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: var(--chrome-raised);
+  border: 1px solid var(--chrome-border);
 }
 .chat .messages li.me {
   align-self: flex-end;
-  background: color-mix(in srgb, var(--accent) 18%, var(--panel));
+  background: color-mix(in srgb, var(--chrome-accent) 18%, var(--chrome-panel));
 }
 .chat .messages li.empty {
   max-width: none;
-  color: var(--muted);
+  color: var(--chrome-muted);
   border: 0;
   background: none;
 }
@@ -624,8 +1706,9 @@ select {
   margin-right: 0.4rem;
 }
 .chat time {
-  color: var(--muted);
+  color: var(--chrome-muted);
   font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
 }
 .chat .messages p {
   margin: 0.2rem 0 0;
@@ -640,13 +1723,11 @@ select {
 .chat textarea {
   flex: 1;
   resize: none;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 0.3rem;
-  background: var(--bg);
-  color: var(--text);
   font: inherit;
   font-size: max(16px, 1em); /* below 16px iOS zooms the page on focus */
+}
+.chat form button {
+  align-self: stretch;
 }
 
 /* All displays at once: side by side, each as wide as its share (flex-grow = its width) */
@@ -660,35 +1741,21 @@ select {
   width: auto;
 }
 
-/* Recording */
-.toolbar .rec {
-  flex: none;
-  color: #ff5a5a;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+/* Trackpad mode */
+/* The local cursor (touch.ts): placed by transform from client coordinates, so fixed. */
+.trackpad-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 28px;
+  pointer-events: none;
+  z-index: 5;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.6));
 }
-.rec-note {
-  position: absolute;
-  top: 0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 4;
-  margin: 0;
-  display: flex;
-  gap: 0.6rem;
-  align-items: center;
-  max-width: min(36rem, calc(100% - 1rem));
-  padding: 0.45rem 0.7rem;
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--danger);
-  border-radius: 0.4rem;
-  font-size: 0.9rem;
+.trackpad-cursor svg {
+  display: block;
 }
-.rec-note button {
-  border: 0;
-  background: none;
-  color: inherit;
-  font-size: 1.1rem;
-  cursor: pointer;
+.keybar .pointer-mode {
+  font-size: 0.85rem;
 }
