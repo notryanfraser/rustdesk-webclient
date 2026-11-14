@@ -179,7 +179,10 @@ export function ConnectScreen(props: {
   return (
     <main class="connect">
       <header class="connect-head">
-        <h1>Ferry</h1>
+        <div class="connect-brand">
+          <img src="favicon.svg" alt="" width="40" height="40" />
+          <h1>Ferry</h1>
+        </div>
         <p>Control a RustDesk computer from this browser.</p>
       </header>
 

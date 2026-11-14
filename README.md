@@ -1,4 +1,9 @@
-# Ferry
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/banner-dark.svg">
+    <img alt="Ferry: Cross over to any desktop" src=".github/assets/banner-light.svg" width="100%">
+  </picture>
+</h1>
 
 A web client for your self-hosted [RustDesk](https://rustdesk.com) server. Open a page and
 control any of your RustDesk machines from a browser, with nothing to install.
@@ -216,6 +221,8 @@ The protobuf schemas in `core/protos` come from RustDesk 1.5.3.
 the 1.5.3 protocol definitions. Those files say so in their headers. The keyboard code tables
 come from [rdev](https://github.com/Narsil/rdev) (MIT, `core/vendor/rdev/LICENSE`). If you run
 a modified version for others, the AGPL requires you to offer them its source.
+
+The Ferry name, logo and palette are described in [docs/brand](docs/brand/README.md).
 
 "RustDesk" is the name of the RustDesk project and is used here only to say what this client
 works with.
