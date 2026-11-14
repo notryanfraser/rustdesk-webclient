@@ -1,8 +1,8 @@
-# rustdesk-web together with RustDesk's own ID server (hbbs) and relay (hbbr).
-# Already run hbbs/hbbr? See "Already running a RustDesk server" in the README.
+# Ferry together with RustDesk's own ID server (hbbs) and relay (hbbr).
+# Already run hbbs/hbbr? You only need the `ferry` service below: see "Set it up" in the README.
 #
 # Your reverse proxy joins the `rustdesk` network and terminates TLS for the browser:
-#   https://RUSTDESK_HOST       -> rustdesk-web:8080   (the web client)
+#   https://RUSTDESK_HOST       -> ferry:8080   (the web client)
 #   https://RUSTDESK_HOST:21118 -> hbbs:21118          (WebSocket to the ID server)
 #   https://RUSTDESK_HOST:21119 -> hbbr:21119          (WebSocket to the relay)
 # Only the native RustDesk ports are published here; 21118, 21119 and 8080 stay inside the
@@ -33,8 +33,8 @@ services:
     ports:
       - "21117:21117"
 
-  rustdesk-web:
-    image: ghcr.io/notryanfraser/rustdesk-webclient:1
+  ferry:
+    image: ghcr.io/notryanfraser/ferry:1
     # Or build it from this checkout:  build: { context: ., dockerfile: docker/Dockerfile }
     restart: unless-stopped
     environment:

@@ -1,4 +1,4 @@
-// rustdesk-web app: connect screen <-> session view. Each connection attempt mounts a new
+// Ferry app: connect screen <-> session view. Each connection attempt mounts a new
 // SessionView (a fresh canvas; see live.ts). Errors come from the core's taxonomy
 // (describeError / describeSessionClosed) and are shown on the connect screen.
 import { render } from "preact";
@@ -99,7 +99,7 @@ function App({ config }: { config: AppConfig }) {
 function ConfigError({ missing }: { missing: string[] }) {
   return (
     <main class="connect">
-      <h1>rustdesk-web</h1>
+      <h1>Ferry</h1>
       <p class="error" role="alert">
         This deployment is not configured: {missing.join(", ")}{" "}
         {missing.length > 1 ? "are" : "is"} missing. Set{" "}

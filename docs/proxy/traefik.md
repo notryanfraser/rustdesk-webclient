@@ -50,13 +50,13 @@ merges it automatically, and `${RUSTDESK_HOST}` comes from `.env`:
 
 ```yaml
 services:
-  rustdesk-web:
+  ferry:
     labels:
       - traefik.enable=true
-      - traefik.http.routers.rustdesk-web.rule=Host(`${RUSTDESK_HOST}`)
-      - traefik.http.routers.rustdesk-web.entrypoints=websecure
-      - traefik.http.routers.rustdesk-web.tls.certresolver=le
-      - traefik.http.services.rustdesk-web.loadbalancer.server.port=8080
+      - traefik.http.routers.ferry.rule=Host(`${RUSTDESK_HOST}`)
+      - traefik.http.routers.ferry.entrypoints=websecure
+      - traefik.http.routers.ferry.tls.certresolver=le
+      - traefik.http.services.ferry.loadbalancer.server.port=8080
 
   hbbs:
     labels:

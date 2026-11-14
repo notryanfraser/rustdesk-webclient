@@ -1,6 +1,6 @@
 {
-  "name": "rustdesk-web",
-  "short_name": "rustdesk-web",
+  "name": "Ferry",
+  "short_name": "Ferry",
   "description": "Remote desktop through your own RustDesk server",
   "start_url": "./",
   "scope": "./",

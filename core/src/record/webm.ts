@@ -153,8 +153,8 @@ export class WebmWriter {
     const info = el(
       0x1549a966,
       uint(0x2ad7b1, 1_000_000), // TimestampScale: 1 ms
-      text(0x4d80, "rustdesk-web"), // MuxingApp
-      text(0x5741, "rustdesk-web"), // WritingApp
+      text(0x4d80, "Ferry"), // MuxingApp
+      text(0x5741, "Ferry"), // WritingApp
     );
     const videoTrack = el(
       0xae,

@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# rustdesk-web image: the Preact UI and the TypeScript core, served by nginx (non-root, port 8080).
+# Ferry image: the Preact UI and the TypeScript core, served by nginx (non-root, port 8080).
 # Build context: the repository root:   docker build -f docker/Dockerfile .
 
 # ---------------------------------------------------------------- build stage

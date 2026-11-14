@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Ferry</Name>
+  <Repository>ghcr.io/notryanfraser/ferry:1</Repository>
+  <Registry>https://github.com/notryanfraser/ferry/pkgs/container/ferry</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/notryanfraser/ferry/issues</Support>
+  <Project>https://github.com/notryanfraser/ferry</Project>
+  <Overview>Ferry is a web client for your self-hosted RustDesk server: open a page and control any of your RustDesk machines from a browser, with nothing to install. It talks to your existing hbbs (ID server) and hbbr (relay) over WebSocket, so it needs those already running, and a reverse proxy that adds TLS for hbbs on 21118 and hbbr on 21119. See the setup guide linked under Project. Ferry is independent and not made or endorsed by the RustDesk team.</Overview>
+  <Category>Tools: Network:Management</Category>
+  <WebUI>http://[IP]:[PORT:8080]/rustdesk/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/notryanfraser/ferry/main/unraid/ferry.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/notryanfraser/ferry/main/app/src/icons/icon-192.png</Icon>
+  <ExtraParams>--read-only --cap-drop=ALL --security-opt=no-new-privileges:true --tmpfs /var/cache/nginx:uid=101,gid=101,mode=0755 --tmpfs /tmp --tmpfs /run:uid=101,gid=101,mode=0755</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>An existing RustDesk server (hbbs and hbbr) and a reverse proxy with a certificate, such as Nginx Proxy Manager or SWAG. See the guides at https://github.com/notryanfraser/ferry/tree/main/docs/proxy</Requires>
+  <Config Name="Web UI port" Target="8080" Default="8080" Mode="tcp" Description="Port the Ferry page is served on. Point your reverse proxy here, not at the internet." Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+  <Config Name="ID server" Target="RUSTDESK_ID_SERVER" Default="" Mode="" Description="Your RustDesk ID server exactly as native clients write it: host or host:port, e.g. rustdesk.example.com. No https://. The browser reaches it at wss://host:21118." Type="Variable" Display="always" Required="true" Mask="false"/>
+  <Config Name="Key" Target="RUSTDESK_KEY" Default="" Mode="" Description="Contents of hbbs's id_ed25519.pub (in hbbs's data folder). A public key, not a password. The same Key your native clients use." Type="Variable" Display="always" Required="true" Mask="false"/>
+</Container>

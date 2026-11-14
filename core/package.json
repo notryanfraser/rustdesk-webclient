@@ -2,7 +2,7 @@
   "name": "@rustdesk-web/core",
   "version": "0.0.0",
   "private": true,
-  "description": "TypeScript protocol core for rustdesk-web",
+  "description": "TypeScript protocol core for Ferry",
   "license": "AGPL-3.0-only",
   "type": "module",
   "engines": {

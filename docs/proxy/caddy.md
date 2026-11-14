@@ -9,7 +9,7 @@ Replace `rustdesk.example.com` with your `RUSTDESK_HOST`:
 ```caddyfile
 # The web client
 rustdesk.example.com {
-	reverse_proxy rustdesk-web:8080
+	reverse_proxy ferry:8080
 }
 
 # hbbs WebSocket (ID server)
@@ -60,7 +60,7 @@ Already have a Caddy container? Add the two ports and the network to it.
 
 Publish the ports in this repo's `docker-compose.yml` instead, bound to localhost:
 
-- `"127.0.0.1:8080:8080"` on `rustdesk-web`
+- `"127.0.0.1:8080:8080"` on `ferry`
 - `"127.0.0.1:21118:21118"` on `hbbs`
 - `"127.0.0.1:21119:21119"` on `hbbr`
 
