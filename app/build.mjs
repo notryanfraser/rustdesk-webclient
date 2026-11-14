@@ -31,6 +31,7 @@ const STATIC = [
   "index.html",
   "styles.css",
   "favicon.svg",
+  "favicon.ico",
   "manifest.webmanifest",
   "icons/icon.svg",
   "icons/icon-180.png",

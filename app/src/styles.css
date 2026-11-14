@@ -3,7 +3,7 @@
   --panel: #ffffff;
   --text: #171a1f;
   --muted: #5a6370;
-  --accent: #1d4ed8;
+  --accent: #b8400f;
   --on-accent: #ffffff;
   --danger: #c62828;
   --border: #d3d8e0;
@@ -22,7 +22,7 @@
   --chrome-border-strong: #4a505b;
   --chrome-text: #e6e9ee;
   --chrome-muted: #9aa3af;
-  --chrome-accent: #8ab4ff;
+  --chrome-accent: #f06a3a;
   --chrome-on-accent: #0b1220;
   --chrome-pressed: #2f3947;
   --chrome-danger: #ffb4ab;
@@ -49,7 +49,7 @@
     --panel: #1a1d22;
     --text: #e6e9ee;
     --muted: #9aa3af;
-    --accent: #8ab4ff;
+    --accent: #f06a3a;
     --on-accent: #0b1220;
     --danger: #ef5350;
     --border: #2c313a;
@@ -65,7 +65,7 @@
   --panel: #1a1d22;
   --text: #e6e9ee;
   --muted: #9aa3af;
-  --accent: #8ab4ff;
+  --accent: #f06a3a;
   --on-accent: #0b1220;
   --danger: #ef5350;
   --border: #2c313a;
@@ -107,11 +107,21 @@ select {
 .connect-head {
   margin-bottom: 1.5rem;
 }
+.connect-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.5rem;
+}
+.connect-brand img {
+  width: 2.5rem;
+  height: 2.5rem;
+}
 .connect h1 {
   font-size: 1.75rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  margin: 0 0 0.3rem;
+  margin: 0;
 }
 .connect-head p {
   margin: 0;
