@@ -2,7 +2,7 @@
   "name": "@rustdesk-web/app",
   "version": "0.0.0",
   "private": true,
-  "description": "Browser UI for rustdesk-web (Preact, built with esbuild)",
+  "description": "Browser UI for Ferry (Preact, built with esbuild)",
   "license": "AGPL-3.0-only",
   "type": "module",
   "engines": {

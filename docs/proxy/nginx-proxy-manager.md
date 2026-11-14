@@ -37,7 +37,7 @@ networks:
 | Tab | Field | Value |
 |---|---|---|
 | Details | Domain Names | `rustdesk.example.com` |
-| Details | Scheme / Forward Hostname / Port | `http` / `rustdesk-web` / `8080` |
+| Details | Scheme / Forward Hostname / Port | `http` / `ferry` / `8080` |
 | SSL | SSL Certificate | Request a new certificate (or pick yours) |
 | SSL | Force SSL | on |
 

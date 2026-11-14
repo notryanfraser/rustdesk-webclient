@@ -56,4 +56,4 @@ jobs:
       - run: npm run build
         working-directory: app
       - name: Image builds
-        run: docker build -f docker/Dockerfile -t rustdesk-web:ci .
+        run: docker build -f docker/Dockerfile -t ferry:ci .

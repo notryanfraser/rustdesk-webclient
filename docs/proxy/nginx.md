@@ -27,7 +27,7 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/rustdesk.example.com/privkey.pem;
 
     location / {
-        proxy_pass http://rustdesk-web:8080;
+        proxy_pass http://ferry:8080;
         proxy_set_header Host $host;
     }
 }
@@ -85,12 +85,12 @@ What the WebSocket blocks need, and why:
 - **No buffering:** so the stream flows through as it arrives.
 - **`X-Real-IP`:** hbbs and hbbr read the client's address from it.
 
-Then `nginx -t` and reload. nginx looks up `rustdesk-web`, `hbbs` and `hbbr` when it starts, so
+Then `nginx -t` and reload. nginx looks up `ferry`, `hbbs` and `hbbr` when it starts, so
 start this repo's stack first.
 
 **nginx not in Docker?** Publish the three ports in `docker-compose.yml`, bound to localhost:
 
-- `"127.0.0.1:8080:8080"` on `rustdesk-web`
+- `"127.0.0.1:8080:8080"` on `ferry`
 - `"127.0.0.1:21118:21118"` on `hbbs`
 - `"127.0.0.1:21119:21119"` on `hbbr`
 
@@ -124,7 +124,7 @@ Then use `127.0.0.1:<port>` in the `proxy_pass` lines.
    restart SWAG:
 
 ```nginx
-# rustdesk-web, hbbs and hbbr behind SWAG. Assumes the hostname rustdesk.<your domain>;
+# ferry, hbbs and hbbr behind SWAG. Assumes the hostname rustdesk.<your domain>;
 # change server_name if yours differs.
 
 # The web client
@@ -137,7 +137,7 @@ server {
     location / {
         include /config/nginx/proxy.conf;
         include /config/nginx/resolver.conf;
-        set $upstream_app rustdesk-web;
+        set $upstream_app ferry;
         set $upstream_port 8080;
         set $upstream_proto http;
         proxy_pass $upstream_proto://$upstream_app:$upstream_port;

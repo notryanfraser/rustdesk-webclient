@@ -1,9 +1,9 @@
-# rustdesk-web
+# Ferry
 
 A web client for your self-hosted [RustDesk](https://rustdesk.com) server. Open a page and
 control any of your RustDesk machines from a browser, with nothing to install.
 
-> rustdesk-web is an independent project. It works with RustDesk but is not made or
+> Ferry is an independent project. It works with RustDesk but is not made or
 > endorsed by the RustDesk team. It speaks RustDesk's protocol to the open-source
 > `rustdesk-server` (hbbs/hbbr).
 
@@ -40,7 +40,7 @@ insist on TLS (`wss://`) for a page served over https, so a reverse proxy in fro
 
 ```
                           ┌──────────── reverse proxy (TLS) ────────────┐
-browser ── https://rustdesk.example.com        ──►  rustdesk-web:8080     (the page)
+browser ── https://rustdesk.example.com        ──►  ferry:8080            (the page)
         ── wss://rustdesk.example.com:21118    ──►  hbbs:21118            (ID server)
         ── wss://rustdesk.example.com:21119    ──►  hbbr:21119            (relay)
 
@@ -58,35 +58,36 @@ So one hostname with a certificate, and three TLS ports on your proxy, is all it
 
 ## Set it up
 
-You need:
+Ferry is one small container that serves a static page. It does **not** replace your RustDesk
+server, and it does not need Docker Compose: most people already run hbbs and hbbr, so they
+only add Ferry and a reverse proxy. You need:
 
-- Docker with Compose.
-- A hostname for your RustDesk server, e.g. `rustdesk.example.com`, that resolves to the
-  machine running Docker. Inside your network, it must resolve there too: use local DNS, or a
-  router that supports hairpin NAT.
+- A running RustDesk server (hbbs and hbbr). No server yet? See
+  [Don't have a server yet?](#dont-have-a-server-yet) below.
+- A hostname for it, e.g. `rustdesk.example.com`. Inside your network, it must resolve to the
+  machine your proxy runs on too: use local DNS, or a router that supports hairpin NAT.
 - A reverse proxy that can get a certificate for that name.
 
-**1. Get the files and set the hostname**
+**1. Run Ferry.** Pick whichever suits how you run containers. All need the same two settings:
+your ID server's address and hbbs's public key (the contents of its `id_ed25519.pub`).
 
-```sh
-git clone https://github.com/notryanfraser/rustdesk-webclient.git && cd rustdesk-webclient
-cp .env.example .env        # then set RUSTDESK_HOST
-```
+- **Unraid:** use the template. See [docs/unraid.md](docs/unraid.md).
+- **Docker:**
 
-**2. Start the RustDesk server and copy its key**
+  ```sh
+  docker run -d --name ferry --restart unless-stopped -p 8080:8080 \
+    -e RUSTDESK_ID_SERVER=rustdesk.example.com \
+    -e RUSTDESK_KEY="$(cat /path/to/hbbs/data/id_ed25519.pub)" \
+    --read-only --cap-drop=ALL --security-opt no-new-privileges:true \
+    --tmpfs /var/cache/nginx:uid=101,gid=101,mode=0755 --tmpfs /tmp \
+    --tmpfs /run:uid=101,gid=101,mode=0755 \
+    ghcr.io/notryanfraser/ferry:1
+  ```
 
-```sh
-docker compose up -d hbbs hbbr
-cat data/id_ed25519.pub     # paste this into .env as RUSTDESK_KEY
-```
+- **Docker Compose, TrueNAS, Portainer and others:** copy the `ferry` service from
+  [docker-compose.yml](docker-compose.yml) into your own stack.
 
-**3. Start the web client**
-
-```sh
-docker compose up -d
-```
-
-**4. Put your reverse proxy in front.** Follow the guide for yours:
+**2. Put your reverse proxy in front.** Follow the guide for yours:
 
 | Proxy | Guide |
 |---|---|
@@ -95,29 +96,42 @@ docker compose up -d
 | nginx, or SWAG | [docs/proxy/nginx.md](docs/proxy/nginx.md) |
 | Nginx Proxy Manager | [docs/proxy/nginx-proxy-manager.md](docs/proxy/nginx-proxy-manager.md) |
 
-**5. Open the ports.** If you use it from outside your network, forward TCP 443, 21118 and
-21119 to the proxy, plus RustDesk's usual 21115-21117 (TCP) and 21116 (UDP) to hbbs/hbbr.
+The guides forward to containers named `ferry`, `hbbs` and `hbbr`. Substitute your own
+container names or addresses.
 
-**6. Connect.** Open `https://rustdesk.example.com`, enter a remote's ID and password, and
-press Connect. The remotes must use the same server: set their ID server to
-`rustdesk.example.com` and their Key to the contents of `id_ed25519.pub`.
-
-### Already running a RustDesk server?
-
-Keep it, and just add the `rustdesk-web` service (copy it from [docker-compose.yml](docker-compose.yml))
-with `RUSTDESK_ID_SERVER` set to the address your clients use.
-
-- **Ports:** your proxy must be able to listen on 21118 and 21119 for that hostname.
-  - If hbbs/hbbr publish 21118/21119 on the same machine (for example with
-    `network_mode: host`, as in RustDesk's own compose file), stop publishing those two
-    ports.
-  - Then give the proxy access over a Docker network, as this repo's compose file does.
+- **Ports:** your proxy must be able to listen on 21118 and 21119 for that hostname. If your
+  hbbs/hbbr already publish those two ports on the same machine (for example with
+  `network_mode: host`, as in RustDesk's own compose file), either give the proxy a different
+  IP or stop publishing them and let the proxy reach hbbs/hbbr over a Docker network.
 - **Relay address:** check hbbs's relay setting (`-r`). It must be a hostname your proxy has a
   certificate for, without a port or with `:21117`.
 
+**3. Open the ports.** If you use it from outside your network, forward TCP 443, 21118 and
+21119 to the proxy. RustDesk's usual 21115-21117 (TCP) and 21116 (UDP) stay as they are.
+
+**4. Connect.** Open `https://rustdesk.example.com`, enter a remote's ID and password, and
+press Connect. The remotes must use the same server (their ID server set to
+`rustdesk.example.com` and their Key to the contents of `id_ed25519.pub`), as they already do.
+
+### Don't have a server yet?
+
+[docker-compose.yml](docker-compose.yml) runs hbbs, hbbr and Ferry together. It's an option,
+not a requirement.
+
+```sh
+git clone https://github.com/notryanfraser/ferry.git && cd ferry
+cp .env.example .env        # then set RUSTDESK_HOST
+docker compose up -d hbbs hbbr
+cat data/id_ed25519.pub     # paste this into .env as RUSTDESK_KEY
+docker compose up -d
+```
+
+Then continue from step 2 above. Only the native RustDesk ports are published; 21118, 21119 and
+8080 stay on the `rustdesk` Docker network for your proxy to join.
+
 ### Configuration
 
-The `rustdesk-web` container reads two variables:
+The Ferry container reads two variables:
 
 | Variable | Required | Value |
 |---|---|---|
@@ -177,10 +191,10 @@ status means the proxy isn't passing the WebSocket upgrade on.
 ## Build from source
 
 ```sh
-docker build -f docker/Dockerfile -t rustdesk-web .
+docker build -f docker/Dockerfile -t ferry .
 ```
 
-Then use `image: rustdesk-web` in the compose file. Development needs Node 22:
+Then use `image: ferry` in your compose file or `docker run`. Development needs Node 22:
 
 ```sh
 cd core && npm ci && npm test        # protocol core: TypeScript, tests with vitest
